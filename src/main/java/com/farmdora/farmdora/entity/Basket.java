@@ -1,13 +1,10 @@
 package com.farmdora.farmdora.entity;
 
-import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,30 +15,20 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "basket",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "UIX_basket", columnNames = {"option_id", "user_id"})
-        }
-)
 public class Basket {
 
-    @EmbeddedId
-    private BasketId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "basket_id")
+    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId")
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(nullable = false)
+    private Integer user_id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("optionId")
-    @JoinColumn(name = "option_id", nullable = false)
-    private Option option;
+    @Column(nullable = false)
+    private Integer option_id;
 
-    public Basket(User user, Option option) {
-        this.id = new BasketId(user.getUserId(), option.getId());
-        this.user = user;
-        this.option = option;
-    }
+    @Column(nullable = false)
+    private Integer quantity;
 }
 

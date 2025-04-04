@@ -46,5 +46,5 @@ public class Option {
     private int quantity;
 
     @Column(nullable = false)
-    private boolean isSoldout;
+    private boolean isStop;
 }

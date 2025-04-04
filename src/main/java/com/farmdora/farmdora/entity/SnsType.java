@@ -18,7 +18,7 @@ import lombok.ToString;
 public class SnsType {
 
     @Id
-    @Column(name = "type_Id")
+    @Column(name = "type_id")
     private Short id;
 
     @Column(length = 50)

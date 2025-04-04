@@ -39,12 +39,6 @@ public class Order extends BaseTimeEntity {
     @JoinColumn(name = "status_id")
     private OrderStatus status;
 
-    @Column(nullable = false)
-    private int quantity;
-
-    @Column(nullable = false)
-    private int price;
-
     @Embedded
     private Address address;
 }

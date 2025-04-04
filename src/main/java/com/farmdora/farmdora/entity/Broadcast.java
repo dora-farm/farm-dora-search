@@ -28,8 +28,8 @@ public class Broadcast extends BaseTimeEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(nullable = false, name = "seller_id")
+    private Seller seller;
 
     @Column(nullable = false, length = 50)
     private String title;
