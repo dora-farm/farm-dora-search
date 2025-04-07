@@ -1,12 +1,3 @@
----
-name: PR template
-about: PR template
-title: "[이슈키] 유형: 제목"
-labels: ''
-assignees: ''
-
----
-
 ## 📌 작업 내용
 
 <br><br>
