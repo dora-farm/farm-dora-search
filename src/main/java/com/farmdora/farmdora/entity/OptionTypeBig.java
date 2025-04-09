@@ -21,6 +21,6 @@ public class OptionTypeBig {
     @Column(name = "type_big_id")
     private Short id;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String name;
 }

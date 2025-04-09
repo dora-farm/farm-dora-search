@@ -39,9 +39,7 @@ public class Popup extends BaseTimeEntity {
 
     private String originFile;
 
-    @Column(nullable = false)
     private LocalDateTime startDate;
 
-    @Column(nullable = false)
     private LocalDateTime endDate;
 }

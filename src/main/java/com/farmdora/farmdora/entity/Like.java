@@ -22,10 +22,8 @@ public class Like {
     @Column(name = "like_id")
     private Integer id;
 
-    @Column(nullable = false)
     private Integer saleId;
 
-    @Column(nullable = false)
     private Integer userId;
 }
 

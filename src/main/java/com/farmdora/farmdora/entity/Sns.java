@@ -25,13 +25,13 @@ public class Sns {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "user_id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "type_id")
+    @JoinColumn(name = "type_id")
     private SnsType type;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String snsName;
 }

@@ -25,9 +25,9 @@ public class OptionType {
     private Short id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "type_big_id")
+    @JoinColumn(name = "type_big_id")
     private OptionTypeBig optionTypeBig;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String name;
 }

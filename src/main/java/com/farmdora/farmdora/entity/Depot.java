@@ -29,16 +29,16 @@ public class Depot {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "user_id")
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String deliveryName;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String name;
 
-    @Column(nullable = false, length = 30)
+    @Column(length = 30)
     private String phoneNum;
 
     @Embedded
@@ -46,6 +46,5 @@ public class Depot {
 
     private String require;
 
-    @Column(nullable = false)
     private boolean isDefault;
 }

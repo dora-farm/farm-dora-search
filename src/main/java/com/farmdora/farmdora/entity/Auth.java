@@ -17,6 +17,6 @@ public class Auth {
     @Column(name = "auth_id")
     private Short id;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String role;
 }
