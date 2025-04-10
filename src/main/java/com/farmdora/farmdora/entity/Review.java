@@ -28,12 +28,11 @@ public class Review extends BaseTimeEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "order_id")
+    @JoinColumn(name = "order_id")
     private Order order;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false)
     private byte score;
 }

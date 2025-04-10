@@ -22,13 +22,10 @@ public class Basket {
     @Column(name = "basket_id")
     private Integer id;
 
-    @Column(nullable = false)
     private Integer user_id;
 
-    @Column(nullable = false)
     private Integer option_id;
 
-    @Column(nullable = false)
     private Integer quantity;
 }
 

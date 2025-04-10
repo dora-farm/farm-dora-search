@@ -65,10 +65,8 @@ public class User extends BaseTimeEntity {
     @Column(length = 30)
     private String phoneNum;
 
-    @Column(nullable = false)
     private boolean isExpire;
 
-    @Column(nullable = false)
     private boolean isBlind;
 
     @OneToOne(fetch = FetchType.LAZY)

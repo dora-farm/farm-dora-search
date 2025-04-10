@@ -28,25 +28,23 @@ public class Question extends BaseTimeEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "user_id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "sale_id")
+    @JoinColumn(name = "sale_id")
     private Sale sale;
 
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @Column(columnDefinition = "TEXT")
     private String answer;
 
-    @Column(nullable = false)
     private boolean isProcess;
 
-    @Column(nullable = false)
     private boolean isBlind;
 }

@@ -28,12 +28,10 @@ public class RefundFile {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "refund_id")
+    @JoinColumn(name = "refund_id")
     private Refund refund;
 
-    @Column(nullable = false)
     private String originFile;
 
-    @Column(nullable = false)
     private String saveFile;
 }
