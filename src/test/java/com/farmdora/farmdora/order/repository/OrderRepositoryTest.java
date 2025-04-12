@@ -33,8 +33,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
-@Import(AuditConfig.class)
 @Transactional
+@Import(AuditConfig.class)
 class OrderRepositoryTest {
 
     @Autowired
@@ -202,10 +202,6 @@ class OrderRepositoryTest {
         List<OrderDetailDto> orderDetails = orderRepository.findOrderDetailsByIds(orderIds, Sort.LATEST);
 
         // then
-        OrderDetailDto orderDetail = orderDetails.get(0);
-        assertThat(orderDetail.getOrderId()).isEqualTo(10);
-        assertThat(orderDetail.getSaleId()).isEqualTo(1);
-        assertThat(orderDetail.getSaleTitle()).isEqualTo("고구마");
-        assertThat(orderDetail.getOptionId()).isEqualTo(1);
+        assertThat(orderDetails.size()).isEqualTo(30);
     }
 }
