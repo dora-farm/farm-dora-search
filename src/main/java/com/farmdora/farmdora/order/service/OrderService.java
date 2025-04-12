@@ -29,9 +29,9 @@ public class OrderService {
         List<OrderDetailDto> orderDetails = null;
         if (!orderIds.isEmpty()) {
             orderDetails = orderRepository.findOrderDetailsByIds(orderIds, searchCondition.getSort());
-            return orderMapper.toDto(orders, orderDetails);
+            return orderMapper.mapToOrderSearchResponseDto(orders, orderDetails);
         }
 
-        return orderMapper.toDto(orders, null);
+        return orderMapper.mapToOrderSearchResponseDto(orders, null);
     }
 }
