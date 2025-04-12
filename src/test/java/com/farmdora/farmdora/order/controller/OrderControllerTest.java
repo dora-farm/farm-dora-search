@@ -9,29 +9,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.farmdora.farmdora.ControllerTest;
+import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.order.dto.OrderSearchRequestDto;
 import com.farmdora.farmdora.order.dto.OrderSearchResponseDto;
-import com.farmdora.farmdora.common.response.PageResponseDto;
-import com.farmdora.farmdora.order.service.OrderService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(controllers = OrderController.class)
-class OrderControllerTest {
-
-    @MockitoBean
-    private OrderService orderService;
-
-    @Autowired
-    private MockMvc mvc;
+class OrderControllerTest extends ControllerTest {
 
     @Test
     @DisplayName("판매자 주문목록 조회 API 테스트")
