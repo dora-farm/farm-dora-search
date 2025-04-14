@@ -35,7 +35,7 @@ public class SaleSearchRequestDto {
     private Integer page = 0;
 
     public Pageable toPageable() {
-        final int size = 10;
+        final int size = 15;
         if (this.page != null) {
             return PageRequest.of(this.page, size);
         }
