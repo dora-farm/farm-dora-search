@@ -1,0 +1,69 @@
+package com.farmdora.farmdora.question.controller;
+
+import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_QUESTION_SUCCESS;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.farmdora.farmdora.ControllerTest;
+import com.farmdora.farmdora.common.response.PageResponseDto;
+import com.farmdora.farmdora.question.dto.QuestionResponseDto;
+import com.farmdora.farmdora.question.dto.QuestionSearchRequestDto;
+import java.time.LocalDateTime;
+import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+class QuestionControllerTest extends ControllerTest {
+
+    @Test
+    @DisplayName("문의 목록 검색 API 테스트")
+    void testSearchQuestions() throws Exception {
+        // given
+        List<QuestionResponseDto> questions = List.of(
+                QuestionResponseDto.builder()
+                        .questionId(1)
+                        .userName("user1")
+                        .saleTitle("sale1")
+                        .questionTitle("question1")
+                        .createdDate(LocalDateTime.now())
+                        .isProcess(true)
+                        .build(),
+                QuestionResponseDto.builder()
+                        .questionId(2)
+                        .userName("user2")
+                        .saleTitle("sale2")
+                        .questionTitle("question2")
+                        .createdDate(LocalDateTime.now())
+                        .isProcess(true)
+                        .build()
+        );
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<QuestionResponseDto> questionPage = new PageImpl<>(questions, pageable, 2);
+        PageResponseDto<QuestionResponseDto> result = new PageResponseDto<>(questions, questionPage);
+        when(questionService.searchQuestions(anyInt(), any(QuestionSearchRequestDto.class), any(Pageable.class))).thenReturn(result);
+
+        // when
+        // then
+        mvc.perform(get("/my/seller/order/inquiry")
+                        .param("sellerId", "1")
+                        .param("searchType", "PRODUCT")
+                        .param("keyword", "상추")
+                        .param("searchPeriod", "TODAY")
+                        .param("processTypes", "WAIT")
+                        .param("sort", "LATEST")
+                        .param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", equalTo(200)))
+                .andExpect(jsonPath("$.message", equalTo(SEARCH_QUESTION_SUCCESS.getMessage())))
+                .andExpect(jsonPath("$.data.contents.size()", equalTo(2)));
+    }
+}
