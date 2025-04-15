@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrderMapper {
 
-    public PageResponseDto<OrderSearchResponseDto> toDto(Page<OrderDto> orders, List<OrderDetailDto> orderDetails) {
+    public PageResponseDto<OrderSearchResponseDto> mapToOrderSearchResponseDto(Page<OrderDto> orders, List<OrderDetailDto> orderDetails) {
         List<OrderSearchResponseDto> orderSearchResponseDtos = toOrderList(orders);
         Map<Integer, OrderSearchResponseDto> orderMap = toOrderMap(orderSearchResponseDtos);
 

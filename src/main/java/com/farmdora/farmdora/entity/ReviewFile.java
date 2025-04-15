@@ -31,9 +31,7 @@ public class ReviewFile {
     @JoinColumn(name = "review_id")
     private Review review;
 
-    @Column(nullable = false)
     private String originFile;
 
-    @Column(nullable = false)
     private String saveFile;
 }

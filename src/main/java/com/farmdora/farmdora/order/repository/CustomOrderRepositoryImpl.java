@@ -103,8 +103,6 @@ public class CustomOrderRepositoryImpl implements CustomOrderRepository {
                 .orderBy(ordersOrderBy(sort))
                 .fetch();
 
-        log.info("주문 상세 데이터: {}", orderDetails);
-
         return orderDetails;
     }
 

@@ -88,7 +88,7 @@ class OrderServiceTest {
                 new OrderSearchResponseDto()
         ));
         PageResponseDto<OrderSearchResponseDto> pageResponseDto = new PageResponseDto<>(orderSearchResponseDtos, pages);
-        when(orderMapper.toDto(any(Page.class), anyList())).thenReturn(pageResponseDto);
+        when(orderMapper.mapToOrderSearchResponseDto(any(Page.class), anyList())).thenReturn(pageResponseDto);
 
         // when
         PageResponseDto<OrderSearchResponseDto> result = orderService
