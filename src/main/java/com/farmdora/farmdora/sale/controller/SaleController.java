@@ -1,9 +1,11 @@
 package com.farmdora.farmdora.sale.controller;
 
+import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALE_DETAIL_SUCCESS;
 import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_SALES_SUCCESS;
 
 import com.farmdora.farmdora.common.response.HttpResponse;
 import com.farmdora.farmdora.common.response.PageResponseDto;
+import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
 import com.farmdora.farmdora.sale.dto.SaleSearchResponseDto;
 import com.farmdora.farmdora.sale.service.SaleService;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,5 +46,13 @@ public class SaleController {
         PageResponseDto<SaleSearchResponseDto> result = saleService.searchSales(searchCondition.getSellerId(), searchCondition, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_SALES_SUCCESS.getMessage(), result));
+    }
+
+    @GetMapping("/{saleId}")
+    public ResponseEntity<?> getSaleDetail(Integer userId, @PathVariable("saleId") Integer saleId) {
+        // TODO 스프링 시큐리티 구현 후 userId 가져오기
+        SaleDetailDto saleDetail = saleService.getSaleDetail(userId, saleId);
+        return ResponseEntity.ok()
+                .body(new HttpResponse(HttpStatus.OK, GET_SALE_DETAIL_SUCCESS.getMessage(), saleDetail));
     }
 }
