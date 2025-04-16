@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.farmdora.farmdora.config.AuditConfig;
 import com.farmdora.farmdora.entity.Option;
-import com.farmdora.farmdora.entity.OptionType;
-import com.farmdora.farmdora.entity.OptionTypeBig;
 import com.farmdora.farmdora.entity.OrderOption;
 import com.farmdora.farmdora.entity.Sale;
+import com.farmdora.farmdora.entity.SaleType;
+import com.farmdora.farmdora.entity.SaleTypeBig;
 import com.farmdora.farmdora.entity.Seller;
 import com.farmdora.farmdora.order.dto.Sort;
 import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
@@ -41,24 +41,24 @@ class SaleRepositoryTest {
     private TestEntityManager em;
 
     private Seller seller;
-    private OptionTypeBig bigType;
-    private OptionType smallType;
+    private SaleTypeBig bigType;
+    private SaleType smallType;
 
     @BeforeEach
     void setUp() {
         seller = new Seller();
         em.persist(seller);
 
-        bigType = OptionTypeBig.builder()
+        bigType = SaleTypeBig.builder()
                 .id((short) 1)
                 .name("과일")
                 .build();
         em.persist(bigType);
 
-        smallType = OptionType.builder()
+        smallType = SaleType.builder()
                 .id((short) 1)
                 .name("사과")
-                .optionTypeBig(bigType)
+                .saleTypeBig(bigType)
                 .build();
         em.persist(smallType);
 
@@ -67,19 +67,18 @@ class SaleRepositoryTest {
                     .title("상추" + (i + 1))
                     .isBlind(false)
                     .seller(seller)
+                    .type(smallType)
                     .build();
             em.persist(sale);
 
             Option option1 = Option.builder()
                     .price(100 * (i + 1))
                     .quantity(100)
-                    .type(smallType)
                     .sale(sale)
                     .build();
             Option option2 = Option.builder()
                     .price(100 * (i + 1))
                     .quantity(100)
-                    .type(smallType)
                     .sale(sale)
                     .build();
             em.persist(option1);

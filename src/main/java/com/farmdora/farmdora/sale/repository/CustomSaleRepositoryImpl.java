@@ -1,10 +1,10 @@
 package com.farmdora.farmdora.sale.repository;
 
 import static com.farmdora.farmdora.entity.QOption.option;
-import static com.farmdora.farmdora.entity.QOptionType.optionType;
-import static com.farmdora.farmdora.entity.QOptionTypeBig.optionTypeBig;
 import static com.farmdora.farmdora.entity.QOrderOption.orderOption;
 import static com.farmdora.farmdora.entity.QSale.sale;
+import static com.farmdora.farmdora.entity.QSaleType.saleType;
+import static com.farmdora.farmdora.entity.QSaleTypeBig.saleTypeBig;
 
 import com.farmdora.farmdora.order.dto.Sort;
 import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
@@ -43,8 +43,8 @@ public class CustomSaleRepositoryImpl implements CustomSaleRepository {
                 )
                 .from(sale)
                 .join(option).on(option.sale.eq(sale))
-                .join(optionType).on(option.type.eq(optionType))
-                .join(optionTypeBig).on(optionType.optionTypeBig.eq(optionTypeBig))
+                .join(saleType).on(sale.type.eq(saleType))
+                .join(saleTypeBig).on(saleType.saleTypeBig.eq(saleTypeBig))
                 .where(
                         sale.seller.id.eq(sellerId),
                         titleContains(searchCondition.getKeyword()),
@@ -53,7 +53,10 @@ public class CustomSaleRepositoryImpl implements CustomSaleRepository {
                         isBigTypeEq(searchCondition.getTypeBigId())
                 )
                 .groupBy(sale.id, sale.title, sale.isBlind, sale.createdDate)
-                .orderBy(salesOrderBy(searchCondition.getSort()), sale.id.desc())
+                .orderBy(
+                        salesCreatedDateOrderBy(searchCondition.getSort()),
+                        salesIdOrderBy(searchCondition.getSort())
+                )
                 .limit(pageable.getPageSize())
                 .offset(pageable.getOffset())
                 .fetch();
@@ -79,8 +82,8 @@ public class CustomSaleRepositoryImpl implements CustomSaleRepository {
                 .select(sale.countDistinct())
                 .from(sale)
                 .join(option).on(option.sale.eq(sale))
-                .join(optionType).on(option.type.eq(optionType))
-                .join(optionTypeBig).on(optionType.optionTypeBig.eq(optionTypeBig))
+                .join(saleType).on(sale.type.eq(saleType))
+                .join(saleTypeBig).on(saleType.saleTypeBig.eq(saleTypeBig))
                 .where(
                         sale.seller.id.eq(sellerId),
                         titleContains(searchCondition.getKeyword()),
@@ -117,23 +120,31 @@ public class CustomSaleRepositoryImpl implements CustomSaleRepository {
 
     private BooleanExpression isSmallTypeEq(Short typeId) {
         if (typeId != null) {
-            return option.type.id.eq(typeId);
+            return sale.type.id.eq(typeId);
         }
         return null;
     }
 
     private BooleanExpression isBigTypeEq(Short typeBigId) {
         if (typeBigId != null) {
-            return option.type.optionTypeBig.id.eq(typeBigId);
+            return sale.type.saleTypeBig.id.eq(typeBigId);
         }
         return null;
     }
 
-    private OrderSpecifier<?> salesOrderBy(Sort sort) {
+    private OrderSpecifier<?> salesCreatedDateOrderBy(Sort sort) {
         if (sort.equals(Sort.OLDEST)) {
             return sale.createdDate.asc();
         } else {
             return sale.createdDate.desc();
+        }
+    }
+
+    private OrderSpecifier<?> salesIdOrderBy(Sort sort) {
+        if (sort.equals(Sort.OLDEST)) {
+            return sale.id.asc();
+        } else {
+            return sale.id.desc();
         }
     }
 }
