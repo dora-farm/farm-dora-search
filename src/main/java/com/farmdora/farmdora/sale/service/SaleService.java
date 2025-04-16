@@ -1,11 +1,19 @@
 package com.farmdora.farmdora.sale.service;
 
+import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdora.common.response.PageResponseDto;
+import com.farmdora.farmdora.entity.Option;
+import com.farmdora.farmdora.entity.Sale;
+import com.farmdora.farmdora.entity.SaleFile;
+import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
 import com.farmdora.farmdora.sale.dto.SaleSearchResponseDto;
-import com.farmdora.farmdora.sale.dto.querydsl.SaleOrderCountDto;
 import com.farmdora.farmdora.sale.dto.querydsl.SaleDto;
+import com.farmdora.farmdora.sale.dto.querydsl.SaleOrderCountDto;
 import com.farmdora.farmdora.sale.mapper.SaleMapper;
+import com.farmdora.farmdora.sale.repository.LikeRepository;
+import com.farmdora.farmdora.sale.repository.OptionRepository;
+import com.farmdora.farmdora.sale.repository.SaleFileRepository;
 import com.farmdora.farmdora.sale.repository.SaleRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class SaleService {
     private final SaleRepository saleRepository;
+    private final OptionRepository optionRepository;
+    private final SaleFileRepository saleFileRepository;
+    private final LikeRepository likeRepository;
     private final SaleMapper saleMapper;
 
     @Transactional(readOnly = true)
@@ -46,5 +57,21 @@ public class SaleService {
                 .stream()
                 .map(SaleDto::getSaleId)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public SaleDetailDto getSaleDetail(Integer userId, Integer saleId) {
+        Sale sale = saleRepository.findById(saleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sale", saleId));
+        List<Option> options = optionRepository.findAllBySale(sale);
+        List<SaleFile> saleImages = saleFileRepository.findAllBySale(sale);
+
+        if (userId == null) {
+            return SaleDetailDto.createSaleDetail(sale, saleImages, options, false);
+        }
+
+        boolean exists = likeRepository.existsByUserIdAndSaleId(userId, saleId);
+
+        return SaleDetailDto.createSaleDetail(sale, saleImages, options, exists);
     }
 }
