@@ -36,11 +36,11 @@ public class SaleController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchWithParams(SaleSearchRequestDto searchCondition) {
+    public ResponseEntity<?> searchWithParams() {
         // TODO 스프링 시큐리티 구현 후 userId 가져오기
-        log.info("상품 목록 검색: {}", searchCondition);
+        SaleSearchRequestDto searchCondition = SaleSearchRequestDto.builder().build();
         Pageable pageable = searchCondition.toPageable();
-        PageResponseDto<SaleSearchResponseDto> result = saleService.searchSales(searchCondition.getSellerId(), searchCondition, pageable);
+        PageResponseDto<SaleSearchResponseDto> result = saleService.searchSales(1, searchCondition, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_SALES_SUCCESS.getMessage(), result));
     }
