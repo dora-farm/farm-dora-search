@@ -5,3 +5,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+
+ncp:
+  image:
+    path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/product/
+    type: ?type=h&h=192&ttype=png

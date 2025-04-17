@@ -12,3 +12,8 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
+
+ncp:
+  image:
+    path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/product/
+    type: ?type=h&h=192&ttype=png

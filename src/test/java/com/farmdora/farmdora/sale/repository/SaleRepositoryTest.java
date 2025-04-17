@@ -2,36 +2,23 @@ package com.farmdora.farmdora.sale.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.farmdora.farmdora.config.AuditConfig;
+import com.farmdora.farmdora.entity.Like;
 import com.farmdora.farmdora.entity.Option;
-import com.farmdora.farmdora.entity.OptionType;
-import com.farmdora.farmdora.entity.OptionTypeBig;
-import com.farmdora.farmdora.entity.OrderOption;
+import com.farmdora.farmdora.entity.Review;
 import com.farmdora.farmdora.entity.Sale;
-import com.farmdora.farmdora.entity.Seller;
-import com.farmdora.farmdora.order.dto.Sort;
-import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
-import com.farmdora.farmdora.sale.dto.SaleStatus;
-import com.farmdora.farmdora.sale.dto.querydsl.SaleDto;
-import com.farmdora.farmdora.sale.dto.querydsl.SaleOrderCountDto;
+import com.farmdora.farmdora.entity.SaleType;
+import com.farmdora.farmdora.entity.User;
+import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
 
 @DataJpaTest
-@Transactional
-@Import(AuditConfig.class)
 class SaleRepositoryTest {
 
     @Autowired
@@ -40,98 +27,73 @@ class SaleRepositoryTest {
     @Autowired
     private TestEntityManager em;
 
-    private Seller seller;
-    private OptionTypeBig bigType;
-    private OptionType smallType;
+    @Test
+    @DisplayName("findTop10ByTypeAndIdNotOrderByIdDesc 쿼리메서드 테스트")
+    void testFindTop10ByTypeAndIdNotOrderByIdDesc() {
+        // given
+        User user = new User();
+        em.persist(user);
 
-    @BeforeEach
-    void setUp() {
-        seller = new Seller();
-        em.persist(seller);
-
-        bigType = OptionTypeBig.builder()
+        SaleType type = SaleType.builder()
                 .id((short) 1)
-                .name("과일")
+                .name("소분류1")
                 .build();
-        em.persist(bigType);
+        em.persist(type);
 
-        smallType = OptionType.builder()
-                .id((short) 1)
-                .name("사과")
-                .optionTypeBig(bigType)
+        Sale excludeSale = Sale.builder()
+                .type(type)
                 .build();
-        em.persist(smallType);
+        em.persist(excludeSale);
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 1; i <= 9; i++) {
             Sale sale = Sale.builder()
-                    .title("상추" + (i + 1))
-                    .isBlind(false)
-                    .seller(seller)
+                    .title("title" + i)
+                    .type(type)
                     .build();
             em.persist(sale);
 
-            Option option1 = Option.builder()
-                    .price(100 * (i + 1))
-                    .quantity(100)
-                    .type(smallType)
-                    .sale(sale)
-                    .build();
-            Option option2 = Option.builder()
-                    .price(100 * (i + 1))
-                    .quantity(100)
-                    .type(smallType)
-                    .sale(sale)
-                    .build();
-            em.persist(option1);
-            em.persist(option2);
+            if (i % 2 == 0) {
+                Review review1 = Review.builder()
+                        .sale(sale)
+                        .score((byte) 3)
+                        .build();
+                Review review2 = Review.builder()
+                        .sale(sale)
+                        .score((byte) 4)
+                        .build();
+                em.persist(review1);
+                em.persist(review2);
+            } else {
+                Like like = Like.builder()
+                        .saleId(sale.getId())
+                        .userId(user.getUserId())
+                        .build();
+                em.persist(like);
 
-            OrderOption orderOption1 = OrderOption.builder()
-                    .option(option1)
-                    .build();
-            OrderOption orderOption2 = OrderOption.builder()
-                    .option(option2)
-                    .build();
-            em.persist(orderOption1);
-            em.persist(orderOption2);
+                Option option1 = Option.builder()
+                        .sale(sale)
+                        .price(1000)
+                        .build();
+                Option option2 = Option.builder()
+                        .sale(sale)
+                        .price(2000)
+                        .build();
+                em.persist(option1);
+                em.persist(option2);
+            }
         }
-    }
+        em.flush();
+        em.clear();
 
-    @Test
-    @DisplayName("상품 목록 검색 및 조회 테스트")
-    void testSearchSales() {
-        // given
-        Integer sellerId = seller.getId();
-        System.out.println(sellerId);
-        SaleSearchRequestDto searchCondition = SaleSearchRequestDto.builder()
-                .keyword("상추")
-                .sort(Sort.LATEST)
-                .filters(Set.of(SaleStatus.INSTOCK))
-                .typeBigId(bigType.getId())
-                .typeId(smallType.getId())
-                .build();
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<SaleDto> result = saleRepository.searchSales(sellerId, searchCondition, pageable);
+        List<SaleRelatedInfoDto> sales = saleRepository.findTop10SalesWithReviewCountByTypeAndExcludedId(type, excludeSale.getId(), pageable);
+//        for (SaleRelatedInfoDto info : sales) {
+//            System.out.println(info.toString());
+//        }
 
         // then
-        assertThat(result.getContent().size()).isEqualTo(10);
-        assertThat(result.getTotalPages()).isEqualTo(1);
-        assertThat(result.getNumber()).isEqualTo(0);
-        assertThat(result.getTotalElements()).isEqualTo(10);
-    }
-
-    @Test
-    @DisplayName("상품 목록 주문 수 조회 테스트")
-    void testSearchOrderCounts() {
-        // given
-        List<Sale> sales = saleRepository.findAll();
-        List<Integer> saleIds = sales.stream().map(s -> s.getId()).collect(Collectors.toList());
-
-        // when
-        List<SaleOrderCountDto> orderCounts = saleRepository.searchSaleOrderCount(saleIds);
-
-        // then
-        assertThat(orderCounts.size()).isEqualTo(10);
+        assertThat(sales.size()).isEqualTo(9);
     }
 }

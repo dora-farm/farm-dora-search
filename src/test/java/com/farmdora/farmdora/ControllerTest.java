@@ -5,6 +5,7 @@ import com.farmdora.farmdora.order.service.OrderService;
 import com.farmdora.farmdora.question.controller.QuestionController;
 import com.farmdora.farmdora.question.service.QuestionService;
 import com.farmdora.farmdora.sale.controller.SaleController;
+import com.farmdora.farmdora.sale.controller.SellerSaleController;
 import com.farmdora.farmdora.sale.service.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -14,7 +15,9 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(controllers = {
         OrderController.class,
         SaleController.class,
-        QuestionController.class
+        QuestionController.class,
+        SellerSaleController.class,
+        SaleController.class
 })
 public abstract class ControllerTest {
 
