@@ -1,7 +1,7 @@
-package com.farmdora.farmdora.question.repository;
+package com.farmdora.farmdora.opinion.repository;
 
-import com.farmdora.farmdora.question.dto.QuestionResponseDto;
-import com.farmdora.farmdora.question.dto.QuestionSearchRequestDto;
+import com.farmdora.farmdora.opinion.dto.QuestionResponseDto;
+import com.farmdora.farmdora.opinion.dto.QuestionSearchRequestDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -1,4 +1,4 @@
-package com.farmdora.farmdora.question.dto;
+package com.farmdora.farmdora.opinion.dto;
 
 import com.farmdora.farmdora.order.dto.SearchPeriod;
 import com.farmdora.farmdora.order.dto.SearchType;

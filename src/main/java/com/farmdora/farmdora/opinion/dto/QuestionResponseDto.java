@@ -1,4 +1,4 @@
-package com.farmdora.farmdora.question.dto;
+package com.farmdora.farmdora.opinion.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
 import java.time.LocalDateTime;

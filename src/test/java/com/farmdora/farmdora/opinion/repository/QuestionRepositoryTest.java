@@ -1,4 +1,4 @@
-package com.farmdora.farmdora.question.repository;
+package com.farmdora.farmdora.opinion.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,9 +10,9 @@ import com.farmdora.farmdora.entity.User;
 import com.farmdora.farmdora.order.dto.SearchPeriod;
 import com.farmdora.farmdora.order.dto.SearchType;
 import com.farmdora.farmdora.order.dto.Sort;
-import com.farmdora.farmdora.question.dto.ProcessType;
-import com.farmdora.farmdora.question.dto.QuestionResponseDto;
-import com.farmdora.farmdora.question.dto.QuestionSearchRequestDto;
+import com.farmdora.farmdora.opinion.dto.ProcessType;
+import com.farmdora.farmdora.opinion.dto.QuestionResponseDto;
+import com.farmdora.farmdora.opinion.dto.QuestionSearchRequestDto;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;

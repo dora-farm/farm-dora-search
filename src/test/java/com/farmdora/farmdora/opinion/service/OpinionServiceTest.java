@@ -1,4 +1,4 @@
-package com.farmdora.farmdora.question.service;
+package com.farmdora.farmdora.opinion.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -9,10 +9,10 @@ import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.order.dto.SearchPeriod;
 import com.farmdora.farmdora.order.dto.SearchType;
 import com.farmdora.farmdora.order.dto.Sort;
-import com.farmdora.farmdora.question.dto.ProcessType;
-import com.farmdora.farmdora.question.dto.QuestionResponseDto;
-import com.farmdora.farmdora.question.dto.QuestionSearchRequestDto;
-import com.farmdora.farmdora.question.repository.QuestionRepository;
+import com.farmdora.farmdora.opinion.dto.ProcessType;
+import com.farmdora.farmdora.opinion.dto.QuestionResponseDto;
+import com.farmdora.farmdora.opinion.dto.QuestionSearchRequestDto;
+import com.farmdora.farmdora.opinion.repository.QuestionRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -27,13 +27,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
-class QuestionServiceTest {
+class OpinionServiceTest {
 
     @Mock
     private QuestionRepository questionRepository;
 
     @InjectMocks
-    private QuestionService questionService;
+    private OpinionService opinionService;
 
     @Test
     @DisplayName("문의 목록 검색 서비스 로직 테스트")
@@ -70,7 +70,7 @@ class QuestionServiceTest {
                 .processTypes(List.of(ProcessType.WAIT))
                 .sort(Sort.OLDEST)
                 .build();
-        PageResponseDto<QuestionResponseDto> result = questionService.searchQuestions(1, searchCondition, pageable);
+        PageResponseDto<QuestionResponseDto> result = opinionService.searchQuestions(1, searchCondition, pageable);
 
         // then
         assertThat(result.getContents().size()).isEqualTo(2);
