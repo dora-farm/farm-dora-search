@@ -1,0 +1,34 @@
+package com.farmdora.farmdora.question.dto;
+
+import com.querydsl.core.annotations.QueryProjection;
+import java.time.LocalDateTime;
+import lombok.*;
+
+@Getter
+@Setter
+@Builder
+@ToString
+@NoArgsConstructor
+public class QuestionResponseDto {
+    private Integer questionId;
+    private String userName;
+    private String saleTitle;
+    private String questionTitle;
+    private LocalDateTime createdDate;
+    private boolean isProcess;
+
+    @QueryProjection
+    public QuestionResponseDto(Integer questionId,
+                               String userName,
+                               String saleTitle,
+                               String questionTitle,
+                               LocalDateTime createdDate,
+                               boolean isProcess) {
+        this.questionId = questionId;
+        this.userName = userName;
+        this.saleTitle = saleTitle;
+        this.questionTitle = questionTitle;
+        this.createdDate = createdDate;
+        this.isProcess = isProcess;
+    }
+}
