@@ -2,6 +2,7 @@ package com.farmdora.farmdora.sale.controller;
 
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_RELATED_SALES_SUCCESS;
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALE_DETAIL_SUCCESS;
+import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_REVIEWS_SUCCESS;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -12,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.farmdora.farmdora.ControllerTest;
 import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
+import com.farmdora.farmdora.common.response.PageResponseDto;
+import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto.OptionDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
@@ -19,6 +22,8 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 public class SaleControllerTest extends ControllerTest {
@@ -112,5 +117,27 @@ public class SaleControllerTest extends ControllerTest {
                     .andExpect(jsonPath("$.status", equalTo(400)))
                     .andExpect(jsonPath("$.message", equalTo("Sale 데이터가 존재하지 않습니다 : '1'")));
         }
+    }
+
+    @Test
+    @DisplayName("상품의 리뷰 목록 조회 API 테스트")
+    void testGetSaleReviewsAPI() throws Exception {
+        // given
+        List<ReviewDetailDto> reviews = List.of(
+            new ReviewDetailDto(),
+            new ReviewDetailDto()
+        );
+        Pageable pageable = PageRequest.of(0, 10);
+        PageImpl<ReviewDetailDto> reviewDetails = new PageImpl<>(reviews, pageable, 2);
+        PageResponseDto<ReviewDetailDto> result = new PageResponseDto<>(reviewDetails.getContent(), reviewDetails);
+        when(saleService.getSaleReviews(anyInt(), any(Pageable.class))).thenReturn(result);
+
+        // when
+        // then
+        mvc.perform(get("/sale/review/{saleId}", 1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", equalTo(200)))
+                .andExpect(jsonPath("$.message", equalTo(SEARCH_REVIEWS_SUCCESS.getMessage())))
+                .andExpect(jsonPath("$.data.contents.size()", equalTo(2)));
     }
 }
