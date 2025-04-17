@@ -11,7 +11,7 @@ import com.farmdora.farmdora.order.dto.SearchType;
 import com.farmdora.farmdora.order.dto.Sort;
 import com.farmdora.farmdora.opinion.dto.ProcessType;
 import com.farmdora.farmdora.opinion.dto.QuestionResponseDto;
-import com.farmdora.farmdora.opinion.dto.QuestionSearchRequestDto;
+import com.farmdora.farmdora.opinion.dto.OpinionSearchRequestDto;
 import com.farmdora.farmdora.opinion.repository.QuestionRepository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -60,10 +60,10 @@ class OpinionServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<QuestionResponseDto> questionPage = new PageImpl<>(questions, pageable, 2);
 
-        when(questionRepository.searchQuestions(anyInt(), any(QuestionSearchRequestDto.class), any(Pageable.class))).thenReturn(questionPage);
+        when(questionRepository.searchQuestions(anyInt(), any(OpinionSearchRequestDto.class), any(Pageable.class))).thenReturn(questionPage);
 
         // when
-        QuestionSearchRequestDto searchCondition = QuestionSearchRequestDto.builder()
+        OpinionSearchRequestDto searchCondition = OpinionSearchRequestDto.builder()
                 .searchType(SearchType.BUYER)
                 .keyword("user")
                 .searchPeriod(SearchPeriod.TODAY)

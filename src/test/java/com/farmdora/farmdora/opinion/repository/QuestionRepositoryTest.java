@@ -12,7 +12,7 @@ import com.farmdora.farmdora.order.dto.SearchType;
 import com.farmdora.farmdora.order.dto.Sort;
 import com.farmdora.farmdora.opinion.dto.ProcessType;
 import com.farmdora.farmdora.opinion.dto.QuestionResponseDto;
-import com.farmdora.farmdora.opinion.dto.QuestionSearchRequestDto;
+import com.farmdora.farmdora.opinion.dto.OpinionSearchRequestDto;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,7 +75,7 @@ class QuestionRepositoryTest {
     void testSearchQuestions() {
         // given
         Integer sellerId = seller.getId();
-        QuestionSearchRequestDto searchCondition = QuestionSearchRequestDto.builder()
+        OpinionSearchRequestDto searchCondition = OpinionSearchRequestDto.builder()
                 .searchType(SearchType.PRODUCT)
                 .keyword("상추")
                 .startDate(LocalDateTime.now().minusDays(1))
@@ -101,7 +101,7 @@ class QuestionRepositoryTest {
     void testSearchQuestionsByWriter() {
         // given
         Integer sellerId = seller.getId();
-        QuestionSearchRequestDto searchCondition = QuestionSearchRequestDto.builder()
+        OpinionSearchRequestDto searchCondition = OpinionSearchRequestDto.builder()
                 .searchType(SearchType.BUYER)
                 .keyword("user")
                 .startDate(LocalDateTime.now().minusDays(1))
@@ -127,7 +127,7 @@ class QuestionRepositoryTest {
     void testSearchQuestionsBySearchPeriod() {
         // given
         Integer sellerId = seller.getId();
-        QuestionSearchRequestDto searchCondition = QuestionSearchRequestDto.builder()
+        OpinionSearchRequestDto searchCondition = OpinionSearchRequestDto.builder()
                 .searchType(SearchType.BUYER)
                 .keyword("user")
                 .searchPeriod(SearchPeriod.TODAY)

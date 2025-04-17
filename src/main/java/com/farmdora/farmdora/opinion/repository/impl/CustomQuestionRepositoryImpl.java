@@ -10,7 +10,7 @@ import com.farmdora.farmdora.order.dto.Sort;
 import com.farmdora.farmdora.opinion.dto.ProcessType;
 import com.farmdora.farmdora.opinion.dto.QQuestionResponseDto;
 import com.farmdora.farmdora.opinion.dto.QuestionResponseDto;
-import com.farmdora.farmdora.opinion.dto.QuestionSearchRequestDto;
+import com.farmdora.farmdora.opinion.dto.OpinionSearchRequestDto;
 import com.farmdora.farmdora.opinion.repository.CustomQuestionRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -34,7 +34,7 @@ public class CustomQuestionRepositoryImpl implements CustomQuestionRepository {
     }
 
     @Override
-    public Page<QuestionResponseDto> searchQuestions(Integer sellerId, QuestionSearchRequestDto searchCondition, Pageable pageable) {
+    public Page<QuestionResponseDto> searchQuestions(Integer sellerId, OpinionSearchRequestDto searchCondition, Pageable pageable) {
         List<QuestionResponseDto> questions = queryFactory
                 .select(new QQuestionResponseDto(
                         question.id,

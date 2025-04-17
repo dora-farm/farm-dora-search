@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.farmdora.farmdora.ControllerTest;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.opinion.dto.QuestionResponseDto;
-import com.farmdora.farmdora.opinion.dto.QuestionSearchRequestDto;
+import com.farmdora.farmdora.opinion.dto.OpinionSearchRequestDto;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +49,7 @@ class OpinionControllerTest extends ControllerTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<QuestionResponseDto> questionPage = new PageImpl<>(questions, pageable, 2);
         PageResponseDto<QuestionResponseDto> result = new PageResponseDto<>(questions, questionPage);
-        when(opinionService.searchQuestions(anyInt(), any(QuestionSearchRequestDto.class), any(Pageable.class))).thenReturn(result);
+        when(opinionService.searchQuestions(anyInt(), any(OpinionSearchRequestDto.class), any(Pageable.class))).thenReturn(result);
 
         // when
         // then

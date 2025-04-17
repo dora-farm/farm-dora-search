@@ -16,7 +16,7 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionSearchRequestDto {
+public class OpinionSearchRequestDto {
     private SearchType searchType;
     private String keyword;
     private SearchPeriod searchPeriod;

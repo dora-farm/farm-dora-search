@@ -5,7 +5,7 @@ import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_QUESTI
 import com.farmdora.farmdora.common.response.HttpResponse;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.opinion.dto.QuestionResponseDto;
-import com.farmdora.farmdora.opinion.dto.QuestionSearchRequestDto;
+import com.farmdora.farmdora.opinion.dto.OpinionSearchRequestDto;
 import com.farmdora.farmdora.opinion.service.OpinionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +24,7 @@ public class OpinionController {
 
     @GetMapping
     public ResponseEntity<?> searchQuestions(Integer sellerId,
-                                             QuestionSearchRequestDto searchCondition,
+                                             OpinionSearchRequestDto searchCondition,
                                              @PageableDefault Pageable pageable) {
         PageResponseDto<QuestionResponseDto> questions = opinionService.searchQuestions(sellerId, searchCondition, pageable);
         return ResponseEntity.ok()
