@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import com.farmdora.farmdora.common.response.PageResponseDto;
+import com.farmdora.farmdora.opinion.dto.ReviewResponseDto;
+import com.farmdora.farmdora.opinion.repository.ReviewRepository;
 import com.farmdora.farmdora.order.dto.SearchPeriod;
 import com.farmdora.farmdora.order.dto.SearchType;
 import com.farmdora.farmdora.order.dto.Sort;
@@ -31,6 +33,9 @@ class OpinionServiceTest {
 
     @Mock
     private QuestionRepository questionRepository;
+
+    @Mock
+    private ReviewRepository reviewRepository;
 
     @InjectMocks
     private OpinionService opinionService;
@@ -71,6 +76,44 @@ class OpinionServiceTest {
                 .sort(Sort.OLDEST)
                 .build();
         PageResponseDto<QuestionResponseDto> result = opinionService.searchQuestions(1, searchCondition, pageable);
+
+        // then
+        assertThat(result.getContents().size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("리뷰 목록 검색 서비스 로직 테스트")
+    void testSearchReviews() {
+        // given
+        List<ReviewResponseDto> reviews = List.of(
+                ReviewResponseDto.builder()
+                        .saleTitle("sale")
+                        .reviewContent("review1")
+                        .writer("user1")
+                        .createdDate(LocalDateTime.now())
+                        .score((byte) 4)
+                        .build(),
+                ReviewResponseDto.builder()
+                        .saleTitle("sale")
+                        .reviewContent("review2")
+                        .writer("user2")
+                        .createdDate(LocalDateTime.now())
+                        .score((byte) 3)
+                        .build()
+        );
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<ReviewResponseDto> reviewPage = new PageImpl<>(reviews, pageable, 2);
+
+        when(reviewRepository.searchReviews(any(OpinionSearchRequestDto.class), any(Pageable.class))).thenReturn(reviewPage);
+
+        // when
+        OpinionSearchRequestDto searchCondition = OpinionSearchRequestDto.builder()
+                .searchType(SearchType.PRODUCT)
+                .keyword("user")
+                .searchPeriod(SearchPeriod.TODAY)
+                .sort(Sort.OLDEST)
+                .build();
+        PageResponseDto<ReviewResponseDto> result = opinionService.searchReviews(searchCondition, pageable);
 
         // then
         assertThat(result.getContents().size()).isEqualTo(2);

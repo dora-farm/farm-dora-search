@@ -1,6 +1,7 @@
 package com.farmdora.farmdora.opinion.controller;
 
 import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_QUESTION_SUCCESS;
+import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_REVIEWS_SUCCESS;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -13,6 +14,7 @@ import com.farmdora.farmdora.ControllerTest;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.opinion.dto.QuestionResponseDto;
 import com.farmdora.farmdora.opinion.dto.OpinionSearchRequestDto;
+import com.farmdora.farmdora.opinion.dto.ReviewResponseDto;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -64,6 +66,46 @@ class OpinionControllerTest extends ControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", equalTo(200)))
                 .andExpect(jsonPath("$.message", equalTo(SEARCH_QUESTION_SUCCESS.getMessage())))
+                .andExpect(jsonPath("$.data.contents.size()", equalTo(2)));
+    }
+
+    @Test
+    @DisplayName("리뷰 목록 검색 API 테스트")
+    void testSearchReviews() throws Exception {
+        // given
+        List<ReviewResponseDto> reviews = List.of(
+                ReviewResponseDto.builder()
+                        .saleTitle("sale")
+                        .reviewContent("review1")
+                        .writer("user1")
+                        .createdDate(LocalDateTime.now())
+                        .score((byte) 4)
+                        .build(),
+                ReviewResponseDto.builder()
+                        .saleTitle("sale")
+                        .reviewContent("review2")
+                        .writer("user2")
+                        .createdDate(LocalDateTime.now())
+                        .score((byte) 3)
+                        .build()
+        );
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<ReviewResponseDto> reviewPage = new PageImpl<>(reviews, pageable, 2);
+        PageResponseDto<ReviewResponseDto> result = new PageResponseDto<>(reviews, reviewPage);
+        when(opinionService.searchReviews(any(OpinionSearchRequestDto.class), any(Pageable.class))).thenReturn(result);
+
+        // when
+        // then
+        mvc.perform(get("/my/seller/order/review")
+                        .param("sellerId", "1")
+                        .param("searchType", "PRODUCT")
+                        .param("keyword", "상추")
+                        .param("searchPeriod", "TODAY")
+                        .param("sort", "LATEST")
+                        .param("page", "0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", equalTo(200)))
+                .andExpect(jsonPath("$.message", equalTo(SEARCH_REVIEWS_SUCCESS.getMessage())))
                 .andExpect(jsonPath("$.data.contents.size()", equalTo(2)));
     }
 }
