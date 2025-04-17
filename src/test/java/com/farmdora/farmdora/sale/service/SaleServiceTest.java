@@ -12,8 +12,11 @@ import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.entity.Option;
 import com.farmdora.farmdora.entity.Sale;
 import com.farmdora.farmdora.entity.SaleFile;
+import com.farmdora.farmdora.entity.SaleType;
 import com.farmdora.farmdora.order.dto.Sort;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
+import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
+import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
 import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
 import com.farmdora.farmdora.sale.dto.SaleSearchResponseDto;
 import com.farmdora.farmdora.sale.dto.SaleStatus;
@@ -28,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -131,66 +135,137 @@ class SaleServiceTest {
         assertThat(result.getContents().size()).isEqualTo(2);
     }
 
-    @Test
-    @DisplayName("상품 상세 정보 조회 서비스 레이어 테스트")
-    void testGetSaleDetail() {
-        // given
-        Sale mockSale = Sale.builder()
-                .id(1)
-                .title("상추")
-                .content("유기농 상추")
-                .origin("국산")
-                .build();
-        when(saleRepository.findById(anyInt())).thenReturn(Optional.of(mockSale));
+    @Nested
+    @DisplayName("판매자의 상품 목록 검색 및 조회 서비스 레이어 테스트")
+    class GetSaleDetailsTests {
 
-        List<Option> options = List.of(
-                Option.builder()
-                        .id(1)
-                        .sale(mockSale)
-                        .name("상추 옵션1")
-                        .price(1000)
-                        .build(),
-                Option.builder()
-                        .id(2)
-                        .sale(mockSale)
-                        .name("상추 옵션2")
-                        .price(2000)
-                        .build()
-        );
-        when(optionRepository.findAllBySale(any(Sale.class))).thenReturn(options);
+        @Test
+        @DisplayName("상품 상세 정보 조회 성공")
+        void testGetSaleDetail() {
+            // given
+            Sale mockSale = Sale.builder()
+                    .id(1)
+                    .title("상추")
+                    .content("유기농 상추")
+                    .origin("국산")
+                    .build();
+            when(saleRepository.findById(anyInt())).thenReturn(Optional.of(mockSale));
 
-        List<SaleFile> saleFiles = List.of(
-                SaleFile.builder()
-                        .sale(mockSale)
-                        .saveFile("URL1")
-                        .build(),
-                SaleFile.builder()
-                        .sale(mockSale)
-                        .saveFile("URL2")
-                        .build()
-        );
-        when(saleFileRepository.findAllBySale(any(Sale.class))).thenReturn(saleFiles);
+            List<Option> options = List.of(
+                    Option.builder()
+                            .id(1)
+                            .sale(mockSale)
+                            .name("상추 옵션1")
+                            .price(1000)
+                            .build(),
+                    Option.builder()
+                            .id(2)
+                            .sale(mockSale)
+                            .name("상추 옵션2")
+                            .price(2000)
+                            .build()
+            );
+            when(optionRepository.findAllBySale(any(Sale.class))).thenReturn(options);
 
-        when(likeRepository.existsByUserIdAndSaleId(anyInt(), anyInt())).thenReturn(true);
+            List<SaleFile> saleFiles = List.of(
+                    SaleFile.builder()
+                            .sale(mockSale)
+                            .saveFile("URL1")
+                            .build(),
+                    SaleFile.builder()
+                            .sale(mockSale)
+                            .saveFile("URL2")
+                            .build()
+            );
+            when(saleFileRepository.findAllBySale(any(Sale.class))).thenReturn(saleFiles);
 
-        // when
-        SaleDetailDto saleDetail = saleService.getSaleDetail(1, 1);
+            when(likeRepository.existsByUserIdAndSaleId(anyInt(), anyInt())).thenReturn(true);
 
-        // then
-        assertThat(saleDetail.getContent()).isEqualTo("유기농 상추");
-        assertThat(saleDetail.getOptions().size()).isEqualTo(2);
-        assertThat(saleDetail.getFiles().size()).isEqualTo(2);
+            // when
+            SaleDetailDto saleDetail = saleService.getSaleDetail(1, 1);
+
+            // then
+            assertThat(saleDetail.getContent()).isEqualTo("유기농 상추");
+            assertThat(saleDetail.getOptions().size()).isEqualTo(2);
+            assertThat(saleDetail.getFiles().size()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("상세정보를 조회하고자 하는 상품이 존재하지 않을 경우 예외 발생테스트")
+        void testGetSaleDetail_SaleNotFoundException() {
+            // given
+            when(saleRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+            // when
+            // then
+            assertThatThrownBy(() -> saleService.getSaleDetail(1, 1))
+                    .isInstanceOf(ResourceNotFoundException.class);
+        }
     }
 
-    @Test
-    @DisplayName("상세정보를 조회하고자 하는 상품이 존재하지 않을 경우 예외 발생테스트")
-    void testGetSaleDetail_SaleNotFoundException() {
-        // given
-        when(saleRepository.findById(anyInt())).thenReturn(Optional.empty());
+    @Nested
+    @DisplayName("관련 상품 목록 조회 서비스 레이어 테스트")
+    class GetRelatedSales {
 
-        // when
-        // then
-        assertThatThrownBy(() -> saleService.getSaleDetail(1, 1))
-                .isInstanceOf(ResourceNotFoundException.class);
+        @Test
+        @DisplayName("관련 상품 목록 조회 성공")
+        void testGetRelatedSales() {
+            // given
+            Sale mockSale = Sale.builder()
+                    .id(1)
+                    .type(new SaleType())
+                    .build();
+            when(saleRepository.findById(anyInt())).thenReturn(Optional.of(mockSale));
+
+            List<SaleRelatedInfoDto> relatedSaleDetails = List.of(
+                    SaleRelatedInfoDto.builder()
+                            .saleId(2)
+                            .title("sale2")
+                            .price(10000)
+                            .reviewCount(10L)
+                            .score(3.5)
+                            .build(),
+                    SaleRelatedInfoDto.builder()
+                            .saleId(3)
+                            .title("sale3")
+                            .price(20000)
+                            .reviewCount(12L)
+                            .score(4.0)
+                            .build()
+            );
+            when(saleRepository.findTop10SalesWithReviewCountByTypeAndExcludedId(any(SaleType.class), anyInt(), any(Pageable.class))).thenReturn(relatedSaleDetails);
+
+            when(likeRepository.existsByUserIdAndSaleId(anyInt(), anyInt())).thenReturn(true);
+
+            SaleFile mockSaleFile = SaleFile.builder()
+                    .sale(mockSale)
+                    .isMain(true)
+                    .originFile("origin_file")
+                    .saveFile("save_file")
+                    .build();
+            when(saleFileRepository.findBySaleIdAndIsMainIsTrue(anyInt())).thenReturn(Optional.of(mockSaleFile));
+
+            // when
+            Pageable pageable = PageRequest.of(0, 10);
+            List<SaleRelatedDto> relatedSales = saleService.getRelatedSales(1, 1, pageable);
+
+            // then
+            assertThat(relatedSales.size()).isEqualTo(2);
+            assertThat(relatedSales.get(0).getSaleId()).isEqualTo(2);
+            assertThat(relatedSales.get(1).getSaleId()).isEqualTo(3);
+        }
+
+        @Test
+        @DisplayName("관련상품을 조회할 상품이 존재하지 않을 경우 예외 발생")
+        void testGetRelatedSales_ResourceNotFoundException() {
+            // given
+            when(saleRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+            // when
+            // then
+            Pageable pageable = PageRequest.of(0, 10);
+            assertThatThrownBy(() -> saleService.getRelatedSales(1, 1, pageable))
+                    .isInstanceOf(ResourceNotFoundException.class);
+        }
     }
 }
