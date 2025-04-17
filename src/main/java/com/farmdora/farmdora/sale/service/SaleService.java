@@ -6,6 +6,8 @@ import com.farmdora.farmdora.entity.Option;
 import com.farmdora.farmdora.entity.Sale;
 import com.farmdora.farmdora.entity.SaleFile;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
+import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
+import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
 import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
 import com.farmdora.farmdora.sale.dto.SaleSearchResponseDto;
 import com.farmdora.farmdora.sale.dto.querydsl.SaleDto;
@@ -17,12 +19,16 @@ import com.farmdora.farmdora.sale.repository.SaleFileRepository;
 import com.farmdora.farmdora.sale.repository.SaleRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -32,6 +38,12 @@ public class SaleService {
     private final SaleFileRepository saleFileRepository;
     private final LikeRepository likeRepository;
     private final SaleMapper saleMapper;
+
+    @Value("${ncp.image.path}")
+    private String imagePath;
+
+    @Value("${ncp.image.type}")
+    private String type;
 
     @Transactional(readOnly = true)
     public PageResponseDto<SaleSearchResponseDto> searchSales(Integer sellerId, SaleSearchRequestDto searchCondition, Pageable pageable) {
@@ -73,5 +85,36 @@ public class SaleService {
         boolean exists = likeRepository.existsByUserIdAndSaleId(userId, saleId);
 
         return SaleDetailDto.createSaleDetail(sale, saleImages, options, exists);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SaleRelatedDto> getRelatedSales(Integer userId, Integer saleId, Pageable pageable) {
+        Sale sale = saleRepository.findById(saleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sale", saleId));
+
+        List<SaleRelatedInfoDto> relatedSaleDetails = saleRepository.findTop10SalesWithReviewCountByTypeAndExcludedId(sale.getType(), saleId, pageable);
+        List<SaleRelatedDto> relatedSales = getRelatedSalesMainImageAndIsLike(userId, relatedSaleDetails);
+
+        log.info("관련 상품 목록: {}", relatedSales);
+
+        return relatedSales;
+    }
+
+    private List<SaleRelatedDto> getRelatedSalesMainImageAndIsLike(Integer userId, List<SaleRelatedInfoDto> relatedSaleDetails) {
+        List<SaleRelatedDto> relatedSales = new ArrayList<>();
+        for (SaleRelatedInfoDto relatedSale : relatedSaleDetails) {
+            boolean isLike = likeRepository.existsByUserIdAndSaleId(userId, relatedSale.getSaleId());
+            Optional<SaleFile> saleFile = saleFileRepository.findBySaleIdAndIsMainIsTrue(relatedSale.getSaleId());
+            relatedSales.add(SaleRelatedDto.createSaleRelatedDto(relatedSale, getMainImage(saleFile), isLike));
+        }
+        return relatedSales;
+    }
+
+    private String getMainImage(Optional<SaleFile> saleFile) {
+        String mainImage = null;
+        if (saleFile.isPresent()) {
+            mainImage = String.format("%s%s%s", imagePath, saleFile.get().getSaveFile(), type);
+        }
+        return mainImage;
     }
 }
