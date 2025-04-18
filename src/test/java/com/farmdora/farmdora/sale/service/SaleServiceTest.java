@@ -15,7 +15,9 @@ import com.farmdora.farmdora.entity.Sale;
 import com.farmdora.farmdora.entity.SaleFile;
 import com.farmdora.farmdora.entity.SaleType;
 import com.farmdora.farmdora.entity.User;
+import com.farmdora.farmdora.opinion.repository.QuestionRepository;
 import com.farmdora.farmdora.opinion.repository.ReviewRepository;
+import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
@@ -24,6 +26,7 @@ import com.farmdora.farmdora.sale.repository.LikeRepository;
 import com.farmdora.farmdora.sale.repository.OptionRepository;
 import com.farmdora.farmdora.sale.repository.SaleFileRepository;
 import com.farmdora.farmdora.sale.repository.SaleRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -33,6 +36,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +58,9 @@ class SaleServiceTest {
 
     @Mock
     private ReviewRepository reviewRepository;
+
+    @Mock
+    private QuestionRepository questionRepository;
 
     @InjectMocks
     private SaleService saleService;
@@ -220,6 +227,42 @@ class SaleServiceTest {
         PageResponseDto<ReviewDetailDto> result = saleService.getSaleReviews(1, pageable);
 
         // then
+        assertThat(result.getContents().size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("상품의 문의 목록 조회 서비스 레이어 테스트")
+    void testGetSaleQuestions() {
+        // given
+        Integer saleId = 1;
+        Sale mockSale = Sale.builder()
+                .id(saleId)
+                .build();
+        when(saleRepository.findById(anyInt())).thenReturn(Optional.of(mockSale));
+
+        List<QuestionResponseDto> questionPages = List.of(
+                QuestionResponseDto.builder()
+                        .id(1)
+                        .title("question1")
+                        .writer("user1")
+                        .createdDate(LocalDateTime.now())
+                        .build(),
+                QuestionResponseDto.builder()
+                        .id(2)
+                        .title("question2")
+                        .writer("user2")
+                        .createdDate(LocalDateTime.now())
+                        .build()
+        );
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<QuestionResponseDto> questions = new PageImpl<>(questionPages, pageable, questionPages.size());
+        when(questionRepository.findQuestionsBySaleId(any(Sale.class), any(Pageable.class))).thenReturn(questions);
+
+        // when
+        PageResponseDto<QuestionResponseDto> result = saleService.getSaleQuestions(saleId, pageable);
+
+        // then
+        System.out.println(result.toString());
         assertThat(result.getContents().size()).isEqualTo(2);
     }
 }

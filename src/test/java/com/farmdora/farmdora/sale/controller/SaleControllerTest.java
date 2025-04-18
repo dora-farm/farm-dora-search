@@ -2,6 +2,7 @@ package com.farmdora.farmdora.sale.controller;
 
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_RELATED_SALES_SUCCESS;
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALE_DETAIL_SUCCESS;
+import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_QUESTION_SUCCESS;
 import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_REVIEWS_SUCCESS;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.farmdora.farmdora.ControllerTest;
 import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdora.common.response.PageResponseDto;
+import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto.OptionDetailDto;
@@ -139,5 +141,51 @@ public class SaleControllerTest extends ControllerTest {
                 .andExpect(jsonPath("$.status", equalTo(200)))
                 .andExpect(jsonPath("$.message", equalTo(SEARCH_REVIEWS_SUCCESS.getMessage())))
                 .andExpect(jsonPath("$.data.contents.size()", equalTo(2)));
+    }
+
+    @Nested
+    @DisplayName("상품의 문의 목록 조회 API 테스트")
+    class GetSaleQuestionsTests {
+
+        @Test
+        @DisplayName("상품의 문의 목록 조회 API 성공")
+        void testGetSaleQuestionsAPI() throws Exception {
+            // given
+            List<QuestionResponseDto> questions = List.of(
+                    QuestionResponseDto.builder()
+                            .title("question1")
+                            .writer("user1")
+                            .build(),
+                    QuestionResponseDto.builder()
+                            .title("question2")
+                            .writer("user2")
+                            .build()
+            );
+            PageResponseDto<QuestionResponseDto> result = new PageResponseDto<>();
+            result.setContents(questions);
+            when(saleService.getSaleQuestions(anyInt(), any(Pageable.class))).thenReturn(result);
+
+            // when
+            // then
+            mvc.perform(get("/sale/question/{saleId}", 1))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status", equalTo(200)))
+                    .andExpect(jsonPath("$.message", equalTo(SEARCH_QUESTION_SUCCESS.getMessage())));
+        }
+
+        @Test
+        @DisplayName("상품의 문의 목록 조회시 상품이 존재하지 않을 경우 예외 발생 API 테스트")
+        void testGetSaleQuestionsAPI_ResourceNotFoundException() throws Exception {
+            // given
+            when(saleService.getSaleQuestions(anyInt(), any(Pageable.class)))
+                    .thenThrow(new ResourceNotFoundException("Sale", 1));
+
+            // when
+            // then
+            mvc.perform(get("/sale/question/{saleId}", 1))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status", equalTo(400)))
+                    .andExpect(jsonPath("$.message", equalTo("Sale 데이터가 존재하지 않습니다 : '1'")));
+        }
     }
 }
