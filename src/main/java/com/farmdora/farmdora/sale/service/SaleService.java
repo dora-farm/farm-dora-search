@@ -6,12 +6,13 @@ import com.farmdora.farmdora.entity.Option;
 import com.farmdora.farmdora.entity.Review;
 import com.farmdora.farmdora.entity.Sale;
 import com.farmdora.farmdora.entity.SaleFile;
+import com.farmdora.farmdora.opinion.repository.QuestionRepository;
 import com.farmdora.farmdora.opinion.repository.ReviewRepository;
+import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
-import com.farmdora.farmdora.sale.mapper.SaleMapper;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
 import com.farmdora.farmdora.sale.repository.OptionRepository;
 import com.farmdora.farmdora.sale.repository.SaleFileRepository;
@@ -37,7 +38,7 @@ public class SaleService {
     private final SaleFileRepository saleFileRepository;
     private final LikeRepository likeRepository;
     private final ReviewRepository reviewRepository;
-    private final SaleMapper saleMapper;
+    private final QuestionRepository questionRepository;
 
     @Value("${ncp.image.path}")
     private String imagePath;
@@ -100,5 +101,14 @@ public class SaleService {
                 .map(ReviewDetailDto::fromEntity)
                 .toList();
         return new PageResponseDto<>(reviewDetails, reviews);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<QuestionResponseDto> getSaleQuestions(Integer saleId, Pageable pageable) {
+        Sale sale = saleRepository.findById(saleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sale", saleId));
+
+        Page<QuestionResponseDto> questions = questionRepository.findQuestionsBySaleId(sale, pageable);
+        return new PageResponseDto<>(questions.getContent(), questions);
     }
 }
