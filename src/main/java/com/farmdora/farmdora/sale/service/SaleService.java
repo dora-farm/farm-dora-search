@@ -124,7 +124,10 @@ public class SaleService {
 
     @Transactional(readOnly = true)
     public PageResponseDto<ReviewDetailDto> getSaleReviews(Integer saleId, Pageable pageable) {
-        Page<Review> reviews = reviewRepository.findAllBySaleId(saleId, pageable);
+        Sale sale = saleRepository.findById(saleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sale", saleId));
+
+        Page<Review> reviews = reviewRepository.findAllBySale(sale, pageable);
         List<ReviewDetailDto> reviewDetails = reviews.getContent()
                 .stream()
                 .map(ReviewDetailDto::fromEntity)
