@@ -103,7 +103,7 @@ public class ReviewRepositoryTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // when
-        Page<Review> reviews = reviewRepository.findAllBySaleId(sale.getId(), pageable);
+        Page<Review> reviews = reviewRepository.findAllBySale(sale, pageable);
 
         // then
         assertThat(reviews.getContent().size()).isEqualTo(2);

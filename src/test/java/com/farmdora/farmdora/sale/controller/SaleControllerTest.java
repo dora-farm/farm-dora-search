@@ -119,25 +119,44 @@ public class SaleControllerTest extends ControllerTest {
         }
     }
 
-    @Test
+    @Nested
     @DisplayName("상품의 리뷰 목록 조회 API 테스트")
-    void testGetSaleReviewsAPI() throws Exception {
-        // given
-        List<ReviewDetailDto> reviews = List.of(
-            new ReviewDetailDto(),
-            new ReviewDetailDto()
-        );
-        Pageable pageable = PageRequest.of(0, 10);
-        PageImpl<ReviewDetailDto> reviewDetails = new PageImpl<>(reviews, pageable, 2);
-        PageResponseDto<ReviewDetailDto> result = new PageResponseDto<>(reviewDetails.getContent(), reviewDetails);
-        when(saleService.getSaleReviews(anyInt(), any(Pageable.class))).thenReturn(result);
+    class GetSaleReviewsTests {
 
-        // when
-        // then
-        mvc.perform(get("/sale/review/{saleId}", 1))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status", equalTo(200)))
-                .andExpect(jsonPath("$.message", equalTo(SEARCH_REVIEWS_SUCCESS.getMessage())))
-                .andExpect(jsonPath("$.data.contents.size()", equalTo(2)));
+        @Test
+        @DisplayName("상품의 리뷰 목록 조회 API 성공")
+        void testGetSaleReviewsAPI() throws Exception {
+            // given
+            List<ReviewDetailDto> reviews = List.of(
+                new ReviewDetailDto(),
+                new ReviewDetailDto()
+            );
+            Pageable pageable = PageRequest.of(0, 10);
+            PageImpl<ReviewDetailDto> reviewDetails = new PageImpl<>(reviews, pageable, 2);
+            PageResponseDto<ReviewDetailDto> result = new PageResponseDto<>(reviewDetails.getContent(), reviewDetails);
+            when(saleService.getSaleReviews(anyInt(), any(Pageable.class))).thenReturn(result);
+
+            // when
+            // then
+            mvc.perform(get("/sale/review/{saleId}", 1))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status", equalTo(200)))
+                    .andExpect(jsonPath("$.message", equalTo(SEARCH_REVIEWS_SUCCESS.getMessage())))
+                    .andExpect(jsonPath("$.data.contents.size()", equalTo(2)));
+        }
+
+        @Test
+        @DisplayName("상품의 리뷰 목록 조회시 상품이 존재하지 않을 경우 예외 발생 API 테스트")
+        void testGetSaleReviewsAPI_SaleNotFoundException() throws Exception {
+            // given
+            when(saleService.getSaleReviews(anyInt(), any(Pageable.class))).thenThrow(new ResourceNotFoundException("Sale", 1));
+
+            // when
+            // then
+            mvc.perform(get("/sale/review/{saleId}", 1))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.status", equalTo(400)))
+                    .andExpect(jsonPath("$.message", equalTo("Sale 데이터가 존재하지 않습니다 : '1'")));
+        }
     }
 }
