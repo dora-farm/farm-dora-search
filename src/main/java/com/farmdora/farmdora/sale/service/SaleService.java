@@ -11,10 +11,6 @@ import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
-import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
-import com.farmdora.farmdora.sale.dto.SaleSearchResponseDto;
-import com.farmdora.farmdora.sale.dto.querydsl.SaleDto;
-import com.farmdora.farmdora.sale.dto.querydsl.SaleOrderCountDto;
 import com.farmdora.farmdora.sale.mapper.SaleMapper;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
 import com.farmdora.farmdora.sale.repository.OptionRepository;
@@ -48,32 +44,6 @@ public class SaleService {
 
     @Value("${ncp.image.type}")
     private String type;
-
-    @Transactional(readOnly = true)
-    public PageResponseDto<SaleSearchResponseDto> searchSales(Integer sellerId, SaleSearchRequestDto searchCondition, Pageable pageable) {
-        Page<SaleDto> salePage = saleRepository.searchSales(sellerId, searchCondition, pageable);
-        List<SaleDto> sales = salePage.getContent();
-        List<Integer> saleIds = getSaleIds(sales);
-        List<SaleOrderCountDto> orderCounts = getOrderCounts(saleIds);
-        List<SaleSearchResponseDto> saleSearchResponseDtos = saleMapper.mapToSaleSearchResponseDto(saleIds, sales, orderCounts);
-
-        return new PageResponseDto<>(saleSearchResponseDtos, salePage);
-    }
-
-    private List<SaleOrderCountDto> getOrderCounts(List<Integer> saleIds) {
-        List<SaleOrderCountDto> orderCounts = new ArrayList<>();
-        if (!saleIds.isEmpty()) {
-            orderCounts = saleRepository.searchSaleOrderCount(saleIds);
-        }
-        return orderCounts;
-    }
-
-    private List<Integer> getSaleIds(List<SaleDto> sales) {
-        return sales
-                .stream()
-                .map(SaleDto::getSaleId)
-                .toList();
-    }
 
     @Transactional(readOnly = true)
     public SaleDetailDto getSaleDetail(Integer userId, Integer saleId) {
