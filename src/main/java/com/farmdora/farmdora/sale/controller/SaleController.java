@@ -2,10 +2,12 @@ package com.farmdora.farmdora.sale.controller;
 
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_RELATED_SALES_SUCCESS;
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALE_DETAIL_SUCCESS;
+import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_QUESTION_SUCCESS;
 import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_REVIEWS_SUCCESS;
 
 import com.farmdora.farmdora.common.response.HttpResponse;
 import com.farmdora.farmdora.common.response.PageResponseDto;
+import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
@@ -52,5 +54,13 @@ public class SaleController {
         PageResponseDto<ReviewDetailDto> reviews = saleService.getSaleReviews(saleId, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_REVIEWS_SUCCESS.getMessage(), reviews));
+    }
+
+    @GetMapping("/question/{saleId}")
+    public ResponseEntity<?> getSaleQuestions(@PathVariable("saleId") Integer saleId,
+                                              @PageableDefault Pageable pageable) {
+        PageResponseDto<QuestionResponseDto> questions = saleService.getSaleQuestions(saleId, pageable);
+        return ResponseEntity.ok()
+                .body(new HttpResponse(HttpStatus.OK, SEARCH_QUESTION_SUCCESS.getMessage(), questions));
     }
 }
