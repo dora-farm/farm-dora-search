@@ -10,10 +10,15 @@ import static org.mockito.Mockito.when;
 import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.entity.Option;
+import com.farmdora.farmdora.entity.Order;
+import com.farmdora.farmdora.entity.Review;
 import com.farmdora.farmdora.entity.Sale;
 import com.farmdora.farmdora.entity.SaleFile;
 import com.farmdora.farmdora.entity.SaleType;
+import com.farmdora.farmdora.entity.User;
+import com.farmdora.farmdora.opinion.repository.ReviewRepository;
 import com.farmdora.farmdora.order.dto.Sort;
+import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
@@ -56,6 +61,9 @@ class SaleServiceTest {
 
     @Mock
     private LikeRepository likeRepository;
+
+    @Mock
+    private ReviewRepository reviewRepository;
 
     @Mock
     private SaleMapper saleMapper;
@@ -205,7 +213,7 @@ class SaleServiceTest {
 
     @Nested
     @DisplayName("관련 상품 목록 조회 서비스 레이어 테스트")
-    class GetRelatedSales {
+    class GetRelatedSalesTests {
 
         @Test
         @DisplayName("관련 상품 목록 조회 성공")
@@ -265,6 +273,60 @@ class SaleServiceTest {
             // then
             Pageable pageable = PageRequest.of(0, 10);
             assertThatThrownBy(() -> saleService.getRelatedSales(1, 1, pageable))
+                    .isInstanceOf(ResourceNotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("상품의 리뷰 목록 조회 서비스 레이어 테스트")
+    class GetSaleReviewsTests {
+
+        @Test
+        @DisplayName("상품의 리뷰 목록 조회 성공")
+        void testGetSaleReviews() {
+            // given
+            Sale sale = Sale.builder()
+                    .id(1)
+                    .build();
+            when(saleRepository.findById(anyInt())).thenReturn(Optional.of(sale));
+
+            Order order = Order.builder()
+                    .user(User.builder().name("user").build())
+                    .build();
+
+            List<Review> reviews = List.of(
+                Review.builder()
+                        .order(order)
+                        .content("review1")
+                        .score((byte) 2)
+                        .build(),
+                Review.builder()
+                        .order(order)
+                        .content("review2")
+                        .score((byte) 3)
+                        .build()
+            );
+            Pageable pageable = PageRequest.of(0, 10);
+            PageImpl<Review> reviewPages = new PageImpl<>(reviews, pageable, 2);
+            when(reviewRepository.findAllBySale(any(Sale.class), any(Pageable.class))).thenReturn(reviewPages);
+
+            // when
+            PageResponseDto<ReviewDetailDto> result = saleService.getSaleReviews(1, pageable);
+
+            // then
+            assertThat(result.getContents().size()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("상품의 리뷰 목록 조회시 상품이 존재하지 않을 경우 예외 발생")
+        void testGetSaleReviews_ResourceNotFoundException() {
+            // given
+            when(saleRepository.findById(anyInt())).thenReturn(Optional.empty());
+
+            // when
+            // then
+            Pageable pageable = PageRequest.of(0, 10);
+            assertThatThrownBy(() -> saleService.getSaleReviews(1, pageable))
                     .isInstanceOf(ResourceNotFoundException.class);
         }
     }

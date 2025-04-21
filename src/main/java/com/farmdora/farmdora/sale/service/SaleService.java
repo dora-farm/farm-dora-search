@@ -3,8 +3,11 @@ package com.farmdora.farmdora.sale.service;
 import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.entity.Option;
+import com.farmdora.farmdora.entity.Review;
 import com.farmdora.farmdora.entity.Sale;
 import com.farmdora.farmdora.entity.SaleFile;
+import com.farmdora.farmdora.opinion.repository.ReviewRepository;
+import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
@@ -37,6 +40,7 @@ public class SaleService {
     private final OptionRepository optionRepository;
     private final SaleFileRepository saleFileRepository;
     private final LikeRepository likeRepository;
+    private final ReviewRepository reviewRepository;
     private final SaleMapper saleMapper;
 
     @Value("${ncp.image.path}")
@@ -116,5 +120,18 @@ public class SaleService {
             mainImage = String.format("%s%s%s", imagePath, saleFile.get().getSaveFile(), type);
         }
         return mainImage;
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<ReviewDetailDto> getSaleReviews(Integer saleId, Pageable pageable) {
+        Sale sale = saleRepository.findById(saleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sale", saleId));
+
+        Page<Review> reviews = reviewRepository.findAllBySale(sale, pageable);
+        List<ReviewDetailDto> reviewDetails = reviews.getContent()
+                .stream()
+                .map(ReviewDetailDto::fromEntity)
+                .toList();
+        return new PageResponseDto<>(reviewDetails, reviews);
     }
 }

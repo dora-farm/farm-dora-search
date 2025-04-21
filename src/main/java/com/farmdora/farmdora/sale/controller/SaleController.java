@@ -2,8 +2,11 @@ package com.farmdora.farmdora.sale.controller;
 
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_RELATED_SALES_SUCCESS;
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALE_DETAIL_SUCCESS;
+import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_REVIEWS_SUCCESS;
 
 import com.farmdora.farmdora.common.response.HttpResponse;
+import com.farmdora.farmdora.common.response.PageResponseDto;
+import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.service.SaleService;
@@ -40,5 +43,14 @@ public class SaleController {
         List<SaleRelatedDto> relatedSales = saleService.getRelatedSales(userId, saleId, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_RELATED_SALES_SUCCESS.getMessage(), relatedSales));
+    }
+
+    @GetMapping("/review/{saleId}")
+    public ResponseEntity<?> getSaleReviews(@PathVariable("saleId") Integer saleId,
+                                            @PageableDefault Pageable pageable) {
+        // TODO 스프링 시큐리티 구현 후 userId 가져오기
+        PageResponseDto<ReviewDetailDto> reviews = saleService.getSaleReviews(saleId, pageable);
+        return ResponseEntity.ok()
+                .body(new HttpResponse(HttpStatus.OK, SEARCH_REVIEWS_SUCCESS.getMessage(), reviews));
     }
 }

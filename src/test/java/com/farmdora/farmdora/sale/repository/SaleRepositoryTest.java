@@ -89,9 +89,6 @@ class SaleRepositoryTest {
 
         // when
         List<SaleRelatedInfoDto> sales = saleRepository.findTop10SalesWithReviewCountByTypeAndExcludedId(type, excludeSale.getId(), pageable);
-//        for (SaleRelatedInfoDto info : sales) {
-//            System.out.println(info.toString());
-//        }
 
         // then
         assertThat(sales.size()).isEqualTo(9);

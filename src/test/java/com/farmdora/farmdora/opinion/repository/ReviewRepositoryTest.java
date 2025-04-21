@@ -1,5 +1,7 @@
 package com.farmdora.farmdora.opinion.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.farmdora.farmdora.config.AuditConfig;
 import com.farmdora.farmdora.entity.Order;
 import com.farmdora.farmdora.entity.Review;
@@ -73,5 +75,37 @@ public class ReviewRepositoryTest {
 
         // then
         System.out.println(result.getContent());
+    }
+
+    @Test
+    @DisplayName("findAllBySaleId() 쿼리메서드 테스트")
+    void testFindAllBySaleId() {
+        // given
+        Sale sale = new Sale();
+        em.persist(sale);
+
+        Review review1 = Review.builder()
+                .sale(sale)
+                .content("review1")
+                .score((byte) 2)
+                .build();
+        Review review2 = Review.builder()
+                .sale(sale)
+                .content("review2")
+                .score((byte) 3)
+                .build();
+        em.persist(review1);
+        em.persist(review2);
+
+        em.flush();
+        em.clear();
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        Page<Review> reviews = reviewRepository.findAllBySale(sale, pageable);
+
+        // then
+        assertThat(reviews.getContent().size()).isEqualTo(2);
     }
 }
