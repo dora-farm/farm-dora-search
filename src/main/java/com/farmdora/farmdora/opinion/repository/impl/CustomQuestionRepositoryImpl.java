@@ -1,4 +1,4 @@
-package com.farmdora.farmdora.question.repository.impl;
+package com.farmdora.farmdora.opinion.repository.impl;
 
 import static com.farmdora.farmdora.entity.QQuestion.question;
 import static com.farmdora.farmdora.entity.QSale.sale;
@@ -7,11 +7,11 @@ import static com.farmdora.farmdora.entity.QUser.user;
 import com.farmdora.farmdora.order.dto.SearchPeriod;
 import com.farmdora.farmdora.order.dto.SearchType;
 import com.farmdora.farmdora.order.dto.Sort;
-import com.farmdora.farmdora.question.dto.ProcessType;
-import com.farmdora.farmdora.question.dto.QQuestionResponseDto;
-import com.farmdora.farmdora.question.dto.QuestionResponseDto;
-import com.farmdora.farmdora.question.dto.QuestionSearchRequestDto;
-import com.farmdora.farmdora.question.repository.CustomQuestionRepository;
+import com.farmdora.farmdora.opinion.dto.ProcessType;
+import com.farmdora.farmdora.opinion.dto.QQuestionResponseDto;
+import com.farmdora.farmdora.opinion.dto.QuestionResponseDto;
+import com.farmdora.farmdora.opinion.dto.OpinionSearchRequestDto;
+import com.farmdora.farmdora.opinion.repository.CustomQuestionRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -34,7 +34,7 @@ public class CustomQuestionRepositoryImpl implements CustomQuestionRepository {
     }
 
     @Override
-    public Page<QuestionResponseDto> searchQuestions(Integer sellerId, QuestionSearchRequestDto searchCondition, Pageable pageable) {
+    public Page<QuestionResponseDto> searchQuestions(Integer sellerId, OpinionSearchRequestDto searchCondition, Pageable pageable) {
         List<QuestionResponseDto> questions = queryFactory
                 .select(new QQuestionResponseDto(
                         question.id,

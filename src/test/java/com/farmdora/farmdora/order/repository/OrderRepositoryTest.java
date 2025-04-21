@@ -44,6 +44,7 @@ class OrderRepositoryTest {
     private TestEntityManager em;
 
     private Seller seller;
+    private List<Integer> orderIds = new ArrayList<>();
 
     @BeforeEach
     void setUp() {
@@ -122,6 +123,7 @@ class OrderRepositoryTest {
                         .build();
             }
             em.persist(order);
+            orderIds.add(order.getId());
 
             OrderOption orderOption1 = OrderOption.builder()
                     .order(order)
@@ -196,7 +198,6 @@ class OrderRepositoryTest {
     @DisplayName("주문PK를 통해 주문 상세 조회")
     void testSearchOrderDetailsByIds() {
         // given
-        List<Integer> orderIds = new ArrayList<>(List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 
         // when
         List<OrderDetailDto> orderDetails = orderRepository.findOrderDetailsByIds(orderIds, Sort.LATEST);

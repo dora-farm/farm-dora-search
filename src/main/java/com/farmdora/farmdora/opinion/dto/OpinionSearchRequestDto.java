@@ -1,4 +1,4 @@
-package com.farmdora.farmdora.question.dto;
+package com.farmdora.farmdora.opinion.dto;
 
 import com.farmdora.farmdora.order.dto.SearchPeriod;
 import com.farmdora.farmdora.order.dto.SearchType;
@@ -16,7 +16,8 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionSearchRequestDto {
+public class OpinionSearchRequestDto {
+    private Integer sellerId;  // TODO JWT 구현완료 후 제거 예정
     private SearchType searchType;
     private String keyword;
     private SearchPeriod searchPeriod;

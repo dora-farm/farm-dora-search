@@ -1,4 +1,4 @@
-package com.farmdora.farmdora.sale.repository;
+package com.farmdora.farmdora.sale.repository.impl;
 
 import static com.farmdora.farmdora.entity.QOption.option;
 import static com.farmdora.farmdora.entity.QOrderOption.orderOption;
@@ -13,6 +13,7 @@ import com.farmdora.farmdora.sale.dto.querydsl.QSaleDto;
 import com.farmdora.farmdora.sale.dto.querydsl.QSaleOrderCountDto;
 import com.farmdora.farmdora.sale.dto.querydsl.SaleDto;
 import com.farmdora.farmdora.sale.dto.querydsl.SaleOrderCountDto;
+import com.farmdora.farmdora.sale.repository.CustomSaleRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;

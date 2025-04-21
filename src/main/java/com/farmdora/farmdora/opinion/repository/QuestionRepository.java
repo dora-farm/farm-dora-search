@@ -1,4 +1,4 @@
-package com.farmdora.farmdora.question.repository;
+package com.farmdora.farmdora.opinion.repository;
 
 import com.farmdora.farmdora.entity.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
