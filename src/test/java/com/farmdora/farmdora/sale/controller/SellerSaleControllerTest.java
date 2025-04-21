@@ -66,14 +66,14 @@ class SellerSaleControllerTest extends ControllerTest {
     }
 
     @Nested
-    @DisplayName("상품 목록 조회 API 테스트")
+    @DisplayName("상품 목록 검색 API 테스트")
     class SearchSales {
 
         @Test
         @DisplayName("JSON으로 상품 목록 조회 API 테스트")
         void testSearchSalesByJsonAPI() throws Exception {
             // given
-            when(saleService.searchSales(anyInt(), any(SaleSearchRequestDto.class), any(Pageable.class))).thenReturn(result);
+            when(sellerSaleService.searchSales(anyInt(), any(SaleSearchRequestDto.class), any(Pageable.class))).thenReturn(result);
 
             // when
             // then
@@ -89,7 +89,7 @@ class SellerSaleControllerTest extends ControllerTest {
         @DisplayName("파라미터로 상품 목록 조회 API 테스트")
         void testSearchSalesByParamsAPI() throws Exception {
             // given
-            when(saleService.searchSales(anyInt(), any(SaleSearchRequestDto.class), any(Pageable.class))).thenReturn(result);
+            when(sellerSaleService.searchSales(anyInt(), any(SaleSearchRequestDto.class), any(Pageable.class))).thenReturn(result);
 
             // when
             // then

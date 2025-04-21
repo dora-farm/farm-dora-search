@@ -6,16 +6,13 @@ import com.farmdora.farmdora.entity.Option;
 import com.farmdora.farmdora.entity.Review;
 import com.farmdora.farmdora.entity.Sale;
 import com.farmdora.farmdora.entity.SaleFile;
+import com.farmdora.farmdora.opinion.repository.QuestionRepository;
 import com.farmdora.farmdora.opinion.repository.ReviewRepository;
+import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
-import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
-import com.farmdora.farmdora.sale.dto.SaleSearchResponseDto;
-import com.farmdora.farmdora.sale.dto.querydsl.SaleDto;
-import com.farmdora.farmdora.sale.dto.querydsl.SaleOrderCountDto;
-import com.farmdora.farmdora.sale.mapper.SaleMapper;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
 import com.farmdora.farmdora.sale.repository.OptionRepository;
 import com.farmdora.farmdora.sale.repository.SaleFileRepository;
@@ -41,39 +38,13 @@ public class SaleService {
     private final SaleFileRepository saleFileRepository;
     private final LikeRepository likeRepository;
     private final ReviewRepository reviewRepository;
-    private final SaleMapper saleMapper;
+    private final QuestionRepository questionRepository;
 
     @Value("${ncp.image.path}")
     private String imagePath;
 
     @Value("${ncp.image.type}")
     private String type;
-
-    @Transactional(readOnly = true)
-    public PageResponseDto<SaleSearchResponseDto> searchSales(Integer sellerId, SaleSearchRequestDto searchCondition, Pageable pageable) {
-        Page<SaleDto> salePage = saleRepository.searchSales(sellerId, searchCondition, pageable);
-        List<SaleDto> sales = salePage.getContent();
-        List<Integer> saleIds = getSaleIds(sales);
-        List<SaleOrderCountDto> orderCounts = getOrderCounts(saleIds);
-        List<SaleSearchResponseDto> saleSearchResponseDtos = saleMapper.mapToSaleSearchResponseDto(saleIds, sales, orderCounts);
-
-        return new PageResponseDto<>(saleSearchResponseDtos, salePage);
-    }
-
-    private List<SaleOrderCountDto> getOrderCounts(List<Integer> saleIds) {
-        List<SaleOrderCountDto> orderCounts = new ArrayList<>();
-        if (!saleIds.isEmpty()) {
-            orderCounts = saleRepository.searchSaleOrderCount(saleIds);
-        }
-        return orderCounts;
-    }
-
-    private List<Integer> getSaleIds(List<SaleDto> sales) {
-        return sales
-                .stream()
-                .map(SaleDto::getSaleId)
-                .toList();
-    }
 
     @Transactional(readOnly = true)
     public SaleDetailDto getSaleDetail(Integer userId, Integer saleId) {
@@ -133,5 +104,14 @@ public class SaleService {
                 .map(ReviewDetailDto::fromEntity)
                 .toList();
         return new PageResponseDto<>(reviewDetails, reviews);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<QuestionResponseDto> getSaleQuestions(Integer saleId, Pageable pageable) {
+        Sale sale = saleRepository.findById(saleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sale", saleId));
+
+        Page<QuestionResponseDto> questions = questionRepository.findQuestionsBySaleId(sale, pageable);
+        return new PageResponseDto<>(questions.getContent(), questions);
     }
 }

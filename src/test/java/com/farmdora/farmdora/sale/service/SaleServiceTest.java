@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
@@ -16,25 +15,20 @@ import com.farmdora.farmdora.entity.Sale;
 import com.farmdora.farmdora.entity.SaleFile;
 import com.farmdora.farmdora.entity.SaleType;
 import com.farmdora.farmdora.entity.User;
+import com.farmdora.farmdora.opinion.repository.QuestionRepository;
 import com.farmdora.farmdora.opinion.repository.ReviewRepository;
-import com.farmdora.farmdora.order.dto.Sort;
+import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
-import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
-import com.farmdora.farmdora.sale.dto.SaleSearchResponseDto;
-import com.farmdora.farmdora.sale.dto.SaleStatus;
-import com.farmdora.farmdora.sale.dto.querydsl.SaleDto;
-import com.farmdora.farmdora.sale.dto.querydsl.SaleOrderCountDto;
-import com.farmdora.farmdora.sale.mapper.SaleMapper;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
 import com.farmdora.farmdora.sale.repository.OptionRepository;
 import com.farmdora.farmdora.sale.repository.SaleFileRepository;
 import com.farmdora.farmdora.sale.repository.SaleRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -66,85 +60,13 @@ class SaleServiceTest {
     private ReviewRepository reviewRepository;
 
     @Mock
-    private SaleMapper saleMapper;
+    private QuestionRepository questionRepository;
 
     @InjectMocks
     private SaleService saleService;
 
-    @Test
-    @DisplayName("판매자의 상품 목록 검색 및 조회 서비스 레이어 테스트")
-    void testSearchSales() {
-        // given
-        List<SaleDto> saleDtos = List.of(
-                SaleDto.builder()
-                        .saleId(1)
-                        .title("상추1")
-                        .price(10000)
-                        .isBlind(false)
-                        .stock(100)
-                        .build(),
-                SaleDto.builder()
-                        .saleId(2)
-                        .title("상추2")
-                        .price(20000)
-                        .isBlind(false)
-                        .stock(200)
-                        .build()
-        );
-        Page<SaleDto> saleSearchResponsePages = new PageImpl<>(saleDtos);
-        when(saleRepository.searchSales(anyInt(), any(SaleSearchRequestDto.class), any(Pageable.class))).thenReturn(saleSearchResponsePages);
-
-        List<SaleOrderCountDto> orderCounts = List.of(
-                SaleOrderCountDto.builder()
-                        .saleId(1)
-                        .orderCount(1L)
-                        .build(),
-                SaleOrderCountDto.builder()
-                        .saleId(2)
-                        .orderCount(1L)
-                        .build()
-        );
-        when(saleRepository.searchSaleOrderCount(anyList())).thenReturn(orderCounts);
-
-        List<SaleSearchResponseDto> saleSearchResponseDtos = List.of(
-                SaleSearchResponseDto.builder()
-                        .saleId(1)
-                        .title("상추1")
-                        .price(10000)
-                        .isBlind(false)
-                        .stock(100)
-                        .orderCount(1L)
-                        .build(),
-                SaleSearchResponseDto.builder()
-                        .saleId(2)
-                        .title("상추2")
-                        .price(20000)
-                        .isBlind(false)
-                        .stock(200)
-                        .orderCount(2L)
-                        .build()
-        );
-        when(saleMapper.mapToSaleSearchResponseDto(anyList(), anyList(), anyList())).thenReturn(saleSearchResponseDtos);
-
-        // when
-        Integer sellerId = 1;
-        SaleSearchRequestDto searchCondition = SaleSearchRequestDto.builder()
-                .keyword("상추")
-                .sort(Sort.LATEST)
-                .filters(Set.of(SaleStatus.INSTOCK))
-                .typeId((short) 1)
-                .typeBigId((short) 1)
-                .build();
-        Pageable pageable = PageRequest.of(0, 10);
-
-        PageResponseDto<SaleSearchResponseDto> result = saleService.searchSales(sellerId, searchCondition, pageable);
-
-        // then
-        assertThat(result.getContents().size()).isEqualTo(2);
-    }
-
     @Nested
-    @DisplayName("판매자의 상품 목록 검색 및 조회 서비스 레이어 테스트")
+    @DisplayName("상품 상세 정보 조회 서비스 레이어 테스트")
     class GetSaleDetailsTests {
 
         @Test
@@ -329,5 +251,41 @@ class SaleServiceTest {
             assertThatThrownBy(() -> saleService.getSaleReviews(1, pageable))
                     .isInstanceOf(ResourceNotFoundException.class);
         }
+    }
+
+    @Test
+    @DisplayName("상품의 문의 목록 조회 서비스 레이어 테스트")
+    void testGetSaleQuestions() {
+        // given
+        Integer saleId = 1;
+        Sale mockSale = Sale.builder()
+                .id(saleId)
+                .build();
+        when(saleRepository.findById(anyInt())).thenReturn(Optional.of(mockSale));
+
+        List<QuestionResponseDto> questionPages = List.of(
+                QuestionResponseDto.builder()
+                        .id(1)
+                        .title("question1")
+                        .writer("user1")
+                        .createdDate(LocalDateTime.now())
+                        .build(),
+                QuestionResponseDto.builder()
+                        .id(2)
+                        .title("question2")
+                        .writer("user2")
+                        .createdDate(LocalDateTime.now())
+                        .build()
+        );
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<QuestionResponseDto> questions = new PageImpl<>(questionPages, pageable, questionPages.size());
+        when(questionRepository.findQuestionsBySaleId(any(Sale.class), any(Pageable.class))).thenReturn(questions);
+
+        // when
+        PageResponseDto<QuestionResponseDto> result = saleService.getSaleQuestions(saleId, pageable);
+
+        // then
+        System.out.println(result.toString());
+        assertThat(result.getContents().size()).isEqualTo(2);
     }
 }

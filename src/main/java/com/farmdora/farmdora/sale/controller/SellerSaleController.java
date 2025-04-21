@@ -7,6 +7,7 @@ import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
 import com.farmdora.farmdora.sale.dto.SaleSearchResponseDto;
 import com.farmdora.farmdora.sale.service.SaleService;
+import com.farmdora.farmdora.sale.service.SellerSaleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/my/seller/sale")
 @RequiredArgsConstructor
 public class SellerSaleController {
-    private final SaleService saleService;
+    private final SellerSaleService saleService;
 
     @PostMapping("/search")
     public ResponseEntity<?> searchWithJson(@RequestBody SaleSearchRequestDto searchCondition) {
