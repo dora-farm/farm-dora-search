@@ -20,6 +20,7 @@ import com.farmdora.farmdora.opinion.repository.ReviewRepository;
 import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
+import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
@@ -287,5 +288,38 @@ class SaleServiceTest {
         // then
         System.out.println(result.toString());
         assertThat(result.getContents().size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("상품의 랭킹 정보 조회 서비스 레이어 테스트")
+    void testGetSaleRank() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        List<SaleRankingDto> sales = List.of(
+                SaleRankingDto.builder()
+                        .saleId(1)
+                        .title("sale1")
+                        .minPrice(10000)
+                        .orderCount(10L)
+                        .build(),
+                SaleRankingDto.builder()
+                        .saleId(2)
+                        .title("sale2")
+                        .minPrice(20000)
+                        .orderCount(20L)
+                        .build()
+        );
+        Page<SaleRankingDto> saleRanks = new PageImpl<>(sales, pageable, 2);
+        when(saleRepository.findTop50ByOrderCount(pageable)).thenReturn(saleRanks);
+
+        // when
+        PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(pageable);
+
+        // then
+        assertThat(result.getContents().size()).isEqualTo(2);
+        assertThat(result.getPageSize()).isEqualTo(10);
+        assertThat(result.getCurrentPage()).isEqualTo(0);
+        assertThat(result.getTotalPages()).isEqualTo(1);
+        assertThat(result.getTotalElements()).isEqualTo(2);
     }
 }

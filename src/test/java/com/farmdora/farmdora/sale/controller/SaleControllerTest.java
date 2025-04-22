@@ -1,6 +1,7 @@
 package com.farmdora.farmdora.sale.controller;
 
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_RELATED_SALES_SUCCESS;
+import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALES_RANK;
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALE_DETAIL_SUCCESS;
 import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_QUESTION_SUCCESS;
 import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_REVIEWS_SUCCESS;
@@ -19,6 +20,7 @@ import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto.OptionDetailDto;
+import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -206,5 +208,31 @@ public class SaleControllerTest extends ControllerTest {
                     .andExpect(jsonPath("$.status", equalTo(400)))
                     .andExpect(jsonPath("$.message", equalTo("Sale 데이터가 존재하지 않습니다 : '1'")));
         }
+    }
+
+    @Test
+    @DisplayName("상위 50개의 상품 목록 조회 API 테스트")
+    void testGetSaleRank() throws Exception {
+        // given
+        PageResponseDto<SaleRankingDto> sales = new PageResponseDto<>();
+        sales.setPageSize(10);
+        sales.setHasPrevious(false);
+        sales.setHasNext(false);
+        sales.setCurrentPage(0);
+        sales.setPageSize(10);
+        sales.setTotalElements(100L);
+        when(saleService.getTop50Sales(any(Pageable.class))).thenReturn(sales);
+
+        // when
+        // then
+        mvc.perform(get("/sale/rank"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", equalTo(200)))
+                .andExpect(jsonPath("$.message", equalTo(GET_SALES_RANK.getMessage())))
+                .andExpect(jsonPath("$.data.pageSize", equalTo(10)))
+                .andExpect(jsonPath("$.data.hasPrevious", equalTo(false)))
+                .andExpect(jsonPath("$.data.hasNext", equalTo(false)))
+                .andExpect(jsonPath("$.data.currentPage", equalTo(0)))
+                .andExpect(jsonPath("$.data.totalElements", equalTo(100)));
     }
 }
