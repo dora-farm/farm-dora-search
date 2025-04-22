@@ -2,8 +2,10 @@ package com.farmdora.farmdora.sale.repository;
 
 import com.farmdora.farmdora.entity.Sale;
 import com.farmdora.farmdora.entity.SaleType;
+import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,4 +27,15 @@ public interface SaleRepository extends JpaRepository<Sale, Integer>, CustomSale
             Pageable pageable
     );
 
+    @Query("SELECT new com.farmdora.farmdora.sale.dto.SaleRankingDto(" +
+            "s.id, " +
+            "s.title, " +
+            "MIN(o.price), " +
+            "COUNT(oo.id)) " +
+            "FROM Sale s " +
+            "JOIN Option o ON o.sale = s " +
+            "JOIN OrderOption oo ON oo.option = o " +
+            "GROUP BY s.id, s.title " +
+            "ORDER BY COUNT(oo.id) DESC, s.id DESC")
+    Page<SaleRankingDto> findTop50ByOrderCount(Pageable pageable);
 }
