@@ -11,6 +11,7 @@ import com.farmdora.farmdora.opinion.repository.ReviewRepository;
 import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
+import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
@@ -113,5 +114,11 @@ public class SaleService {
 
         Page<QuestionResponseDto> questions = questionRepository.findQuestionsBySaleId(sale, pageable);
         return new PageResponseDto<>(questions.getContent(), questions);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<SaleRankingDto> getTop50Sales(Pageable pageable) {
+        Page<SaleRankingDto> sales = saleRepository.findTop50ByOrderCount(pageable);
+        return new PageResponseDto<>(sales.getContent(), sales);
     }
 }
