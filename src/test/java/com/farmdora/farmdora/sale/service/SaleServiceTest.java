@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
@@ -28,6 +30,7 @@ import com.farmdora.farmdora.sale.repository.OptionRepository;
 import com.farmdora.farmdora.sale.repository.SaleFileRepository;
 import com.farmdora.farmdora.sale.repository.SaleRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -62,6 +65,9 @@ class SaleServiceTest {
 
     @Mock
     private QuestionRepository questionRepository;
+
+    @Mock
+    private SaleRedisService saleRedisService;
 
     @InjectMocks
     private SaleService saleService;
@@ -291,9 +297,12 @@ class SaleServiceTest {
     }
 
     @Test
-    @DisplayName("상품의 랭킹 정보 조회 서비스 레이어 테스트")
-    void testGetSaleRank() {
+    @DisplayName("상품의 랭킹 정보 DB 조회 서비스 레이어 테스트")
+    void testGetSaleRankByDB() {
         // given
+        when(saleRedisService.findSaleRanks(anyInt())).thenReturn(null);
+        when(saleRedisService.findSaleRankCount()).thenReturn(null);
+
         Pageable pageable = PageRequest.of(0, 10);
         List<SaleRankingDto> sales = List.of(
                 SaleRankingDto.builder()
@@ -321,5 +330,23 @@ class SaleServiceTest {
         assertThat(result.getCurrentPage()).isEqualTo(0);
         assertThat(result.getTotalPages()).isEqualTo(1);
         assertThat(result.getTotalElements()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("상품의 랭킹 정보 캐시 조회 서비스 레이어 테스트")
+    void testGetSaleRankByCache() {
+        // given
+        List<SaleRankingDto> saleRanks = new ArrayList<>();
+        saleRanks.add(new SaleRankingDto());
+        when(saleRedisService.findSaleRanks(anyInt())).thenReturn(saleRanks);
+        when(saleRedisService.findSaleRankCount()).thenReturn(1);
+
+        // when
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(pageable);
+
+        // then
+        verify(saleRepository, times(0)).findTop50ByOrderCount(pageable);
+        assertThat(result.getContents().size()).isEqualTo(1);
     }
 }
