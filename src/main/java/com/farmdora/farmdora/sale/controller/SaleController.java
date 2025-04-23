@@ -1,6 +1,7 @@
 package com.farmdora.farmdora.sale.controller;
 
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_RELATED_SALES_SUCCESS;
+import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALES_BY_CATEGORIES;
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALES_RANK;
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALE_DETAIL_SUCCESS;
 import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_QUESTION_SUCCESS;
@@ -13,6 +14,8 @@ import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
+import com.farmdora.farmdora.sale.dto.SaleSortType;
+import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import com.farmdora.farmdora.sale.service.SaleService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -71,5 +75,16 @@ public class SaleController {
         PageResponseDto<SaleRankingDto> sales = saleService.getTop50Sales(pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_SALES_RANK.getMessage(), sales));
+    }
+
+    @GetMapping("/type")
+    public ResponseEntity<?> getSalesByType(@RequestParam Short bigTypeId,
+                                            @RequestParam Short typeId,
+                                            @RequestParam SaleSortType sort,
+                                            @PageableDefault(size = 20) Pageable pageable) {
+        // TODO 스프링 시큐리티 구현 후 userId 가져오기
+        PageResponseDto<SaleSummaryDto> sales = saleService.getSalesByCategory(1, bigTypeId, typeId, sort, pageable);
+        return ResponseEntity.ok()
+                .body(new HttpResponse(HttpStatus.OK, GET_SALES_BY_CATEGORIES.getMessage(), sales));
     }
 }
