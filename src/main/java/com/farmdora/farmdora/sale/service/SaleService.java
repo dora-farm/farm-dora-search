@@ -14,6 +14,8 @@ import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
+import com.farmdora.farmdora.sale.dto.SaleSortType;
+import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
 import com.farmdora.farmdora.sale.repository.OptionRepository;
 import com.farmdora.farmdora.sale.repository.SaleFileRepository;
@@ -60,7 +62,7 @@ public class SaleService {
             return SaleDetailDto.createSaleDetail(sale, saleImages, options, false);
         }
 
-        boolean exists = likeRepository.existsByUserIdAndSaleId(userId, saleId);
+        boolean exists = likeRepository.existsByUserUserIdAndSaleId(userId, saleId);
 
         return SaleDetailDto.createSaleDetail(sale, saleImages, options, exists);
     }
@@ -81,7 +83,7 @@ public class SaleService {
     private List<SaleRelatedDto> getRelatedSalesMainImageAndIsLike(Integer userId, List<SaleRelatedInfoDto> relatedSaleDetails) {
         List<SaleRelatedDto> relatedSales = new ArrayList<>();
         for (SaleRelatedInfoDto relatedSale : relatedSaleDetails) {
-            boolean isLike = likeRepository.existsByUserIdAndSaleId(userId, relatedSale.getSaleId());
+            boolean isLike = likeRepository.existsByUserUserIdAndSaleId(userId, relatedSale.getSaleId());
             Optional<SaleFile> saleFile = saleFileRepository.findBySaleIdAndIsMainIsTrue(relatedSale.getSaleId());
             relatedSales.add(SaleRelatedDto.createSaleRelatedDto(relatedSale, getMainImage(saleFile), isLike));
         }
@@ -134,6 +136,12 @@ public class SaleService {
 
     private PageResponseDto<SaleRankingDto> getTop50SalesFromDb(Pageable pageable) {
         Page<SaleRankingDto> sales = saleRepository.findTop50ByOrderCount(pageable);
+        return new PageResponseDto<>(sales.getContent(), sales);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<SaleSummaryDto> getSalesByCategory(Integer userId, Short bigTypeId, Short typeId, SaleSortType sortType, Pageable pageable) {
+        Page<SaleSummaryDto> sales = saleRepository.searchSalesByCategories(userId, bigTypeId, typeId, sortType, pageable);
         return new PageResponseDto<>(sales.getContent(), sales);
     }
 }
