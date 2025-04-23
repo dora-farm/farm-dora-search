@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface SaleRepository extends JpaRepository<Sale, Integer>, CustomSaleRepository {
+public interface SaleRepository extends JpaRepository<Sale, Integer>, CustomSellerSaleRepository, CustomSaleRepository {
 
     @Query("SELECT new com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto(s.id, s.title, MIN(o.price), AVG(r.score), COUNT(r)) " +
             "FROM Sale s " +
