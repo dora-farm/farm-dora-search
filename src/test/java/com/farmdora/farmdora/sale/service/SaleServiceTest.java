@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyShort;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +26,8 @@ import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
+import com.farmdora.farmdora.sale.dto.SaleSortType;
+import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
 import com.farmdora.farmdora.sale.repository.OptionRepository;
 import com.farmdora.farmdora.sale.repository.SaleFileRepository;
@@ -116,7 +119,7 @@ class SaleServiceTest {
             );
             when(saleFileRepository.findAllBySale(any(Sale.class))).thenReturn(saleFiles);
 
-            when(likeRepository.existsByUserIdAndSaleId(anyInt(), anyInt())).thenReturn(true);
+            when(likeRepository.existsByUserUserIdAndSaleId(anyInt(), anyInt())).thenReturn(true);
 
             // when
             SaleDetailDto saleDetail = saleService.getSaleDetail(1, 1);
@@ -172,7 +175,7 @@ class SaleServiceTest {
             );
             when(saleRepository.findTop10SalesWithReviewCountByTypeAndExcludedId(any(SaleType.class), anyInt(), any(Pageable.class))).thenReturn(relatedSaleDetails);
 
-            when(likeRepository.existsByUserIdAndSaleId(anyInt(), anyInt())).thenReturn(true);
+            when(likeRepository.existsByUserUserIdAndSaleId(anyInt(), anyInt())).thenReturn(true);
 
             SaleFile mockSaleFile = SaleFile.builder()
                     .sale(mockSale)
@@ -348,5 +351,37 @@ class SaleServiceTest {
         // then
         verify(saleRepository, times(0)).findTop50ByOrderCount(pageable);
         assertThat(result.getContents().size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("특정 카테고리의 상품 목록 조회 서비스 레이어 테스트")
+    void testGetSalesByCategory() {
+        // given
+        List<SaleSummaryDto> saleSummaries = List.of(
+                SaleSummaryDto.builder()
+                        .saleId(1)
+                        .title("sale1")
+                        .minPrice(10000)
+                        .isLiked(false)
+                        .build(),
+                SaleSummaryDto.builder()
+                        .saleId(2)
+                        .title("sale2")
+                        .minPrice(20000)
+                        .isLiked(false)
+                        .build()
+        );
+        Pageable pageable = PageRequest.of(0, 10);
+        PageImpl<SaleSummaryDto> sales = new PageImpl<>(saleSummaries, pageable, 2);
+        when(saleRepository.searchSalesByCategories(anyInt(), anyShort(), anyShort(), any(SaleSortType.class), any(Pageable.class))).thenReturn(sales);
+
+        // when
+        Short bigTypeId = 1;
+        Short typeId = 2;
+        PageResponseDto<SaleSummaryDto> result = saleService.getSalesByCategory(1, bigTypeId, typeId, SaleSortType.PRICE_DESC, pageable);
+
+        // then
+        assertThat(result.getContents().size()).isEqualTo(2);
+        assertThat(result.getTotalElements()).isEqualTo(2);
     }
 }
