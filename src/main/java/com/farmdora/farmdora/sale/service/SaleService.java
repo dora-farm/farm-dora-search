@@ -11,6 +11,7 @@ import com.farmdora.farmdora.opinion.repository.ReviewRepository;
 import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
+import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,7 @@ public class SaleService {
     private final LikeRepository likeRepository;
     private final ReviewRepository reviewRepository;
     private final QuestionRepository questionRepository;
+    private final SaleRedisService saleRedisService;
 
     @Value("${ncp.image.path}")
     private String imagePath;
@@ -113,5 +116,24 @@ public class SaleService {
 
         Page<QuestionResponseDto> questions = questionRepository.findQuestionsBySaleId(sale, pageable);
         return new PageResponseDto<>(questions.getContent(), questions);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponseDto<SaleRankingDto> getTop50Sales(Pageable pageable) {
+        List<SaleRankingDto> cachedSaleRanks = saleRedisService.findSaleRanks(pageable.getPageNumber());
+        Integer count = saleRedisService.findSaleRankCount();
+
+        if (cachedSaleRanks == null || cachedSaleRanks.isEmpty() || count == null) {
+            log.info("캐시된 데이터가 존재하지 않습니다...DB를 조회합니다...");
+            return getTop50SalesFromDb(pageable);
+        }
+
+        Page<SaleRankingDto> sales = new PageImpl<>(cachedSaleRanks, pageable, count);
+        return new PageResponseDto<>(sales.getContent(), sales);
+    }
+
+    private PageResponseDto<SaleRankingDto> getTop50SalesFromDb(Pageable pageable) {
+        Page<SaleRankingDto> sales = saleRepository.findTop50ByOrderCount(pageable);
+        return new PageResponseDto<>(sales.getContent(), sales);
     }
 }

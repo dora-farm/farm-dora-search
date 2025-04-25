@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
@@ -20,6 +22,7 @@ import com.farmdora.farmdora.opinion.repository.ReviewRepository;
 import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
+import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
@@ -27,6 +30,7 @@ import com.farmdora.farmdora.sale.repository.OptionRepository;
 import com.farmdora.farmdora.sale.repository.SaleFileRepository;
 import com.farmdora.farmdora.sale.repository.SaleRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -61,6 +65,9 @@ class SaleServiceTest {
 
     @Mock
     private QuestionRepository questionRepository;
+
+    @Mock
+    private SaleRedisService saleRedisService;
 
     @InjectMocks
     private SaleService saleService;
@@ -287,5 +294,59 @@ class SaleServiceTest {
         // then
         System.out.println(result.toString());
         assertThat(result.getContents().size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("상품의 랭킹 정보 DB 조회 서비스 레이어 테스트")
+    void testGetSaleRankByDB() {
+        // given
+        when(saleRedisService.findSaleRanks(anyInt())).thenReturn(null);
+        when(saleRedisService.findSaleRankCount()).thenReturn(null);
+
+        Pageable pageable = PageRequest.of(0, 10);
+        List<SaleRankingDto> sales = List.of(
+                SaleRankingDto.builder()
+                        .saleId(1)
+                        .title("sale1")
+                        .minPrice(10000)
+                        .orderCount(10L)
+                        .build(),
+                SaleRankingDto.builder()
+                        .saleId(2)
+                        .title("sale2")
+                        .minPrice(20000)
+                        .orderCount(20L)
+                        .build()
+        );
+        Page<SaleRankingDto> saleRanks = new PageImpl<>(sales, pageable, 2);
+        when(saleRepository.findTop50ByOrderCount(pageable)).thenReturn(saleRanks);
+
+        // when
+        PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(pageable);
+
+        // then
+        assertThat(result.getContents().size()).isEqualTo(2);
+        assertThat(result.getPageSize()).isEqualTo(10);
+        assertThat(result.getCurrentPage()).isEqualTo(0);
+        assertThat(result.getTotalPages()).isEqualTo(1);
+        assertThat(result.getTotalElements()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("상품의 랭킹 정보 캐시 조회 서비스 레이어 테스트")
+    void testGetSaleRankByCache() {
+        // given
+        List<SaleRankingDto> saleRanks = new ArrayList<>();
+        saleRanks.add(new SaleRankingDto());
+        when(saleRedisService.findSaleRanks(anyInt())).thenReturn(saleRanks);
+        when(saleRedisService.findSaleRankCount()).thenReturn(1);
+
+        // when
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(pageable);
+
+        // then
+        verify(saleRepository, times(0)).findTop50ByOrderCount(pageable);
+        assertThat(result.getContents().size()).isEqualTo(1);
     }
 }
