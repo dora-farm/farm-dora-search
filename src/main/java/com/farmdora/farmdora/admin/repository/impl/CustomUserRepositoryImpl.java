@@ -8,6 +8,8 @@ import com.farmdora.farmdora.admin.dto.UserSearchRequestDto;
 import com.farmdora.farmdora.admin.dto.UserSearchResponseDto;
 import com.farmdora.farmdora.admin.dto.UserType;
 import com.farmdora.farmdora.admin.repository.CustomUserRepository;
+import com.farmdora.farmdora.order.dto.Sort;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -43,6 +45,7 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
                 )
                 .limit(pageable.getPageSize())
                 .offset(pageable.getOffset())
+                .orderBy(usersOrderBy(searchCondition.getSort()), user.userId.desc())
                 .fetch();
 
         JPAQuery<Long> countQuery = queryFactory
@@ -78,5 +81,16 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
             }
         }
         return null;
+    }
+
+    private OrderSpecifier<?> usersOrderBy(Sort sort) {
+        if (sort != null) {
+            return switch (sort) {
+                case LATEST -> user.createdDate.desc();
+                case OLDEST -> user.createdDate.asc();
+                default -> null;
+            };
+        }
+        return user.createdDate.desc();
     }
 }
