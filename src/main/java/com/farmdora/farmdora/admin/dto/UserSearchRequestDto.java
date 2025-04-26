@@ -1,5 +1,6 @@
 package com.farmdora.farmdora.admin.dto;
 
+import com.farmdora.farmdora.order.dto.Sort;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,4 +18,5 @@ import lombok.ToString;
 public class UserSearchRequestDto {
     private String keyword;
     private List<UserType> types;
+    private Sort sort;
 }
