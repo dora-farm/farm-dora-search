@@ -3,6 +3,8 @@ package com.farmdora.farmdora.sale.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.farmdora.farmdora.entity.Like;
+import com.farmdora.farmdora.entity.Sale;
+import com.farmdora.farmdora.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +21,22 @@ class LikeRepositoryTest {
     private LikeRepository likeRepository;
 
     @Test
-    @DisplayName("existsByUserIdAndSaleId 쿼리 메서드 테스트")
+    @DisplayName("existsByUserIdAndSaleId() 쿼리 메서드 테스트")
     void testExistsByUserIdAndSaleId() {
         // given
+        User user = new User();
+        em.persist(user);
+
+        Sale sale = new Sale();
+        em.persist(sale);
+
         Like like1 = Like.builder()
-                .userId(1)
-                .saleId(1)
+                .user(user)
+                .sale(sale)
                 .build();
         Like like2 = Like.builder()
-                .userId(2)
-                .saleId(1)
+                .user(user)
+                .sale(sale)
                 .build();
         em.persist(like1);
         em.persist(like2);
@@ -37,7 +45,7 @@ class LikeRepositoryTest {
         em.clear();
 
         // when
-        boolean like = likeRepository.existsByUserIdAndSaleId(1, 1);
+        boolean like = likeRepository.existsByUserUserIdAndSaleId(user.getUserId(), sale.getId());
 
         // then
         assertThat(like).isEqualTo(true);
