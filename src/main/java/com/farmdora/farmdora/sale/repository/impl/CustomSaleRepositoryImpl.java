@@ -1,31 +1,27 @@
 package com.farmdora.farmdora.sale.repository.impl;
 
+import static com.farmdora.farmdora.entity.QLike.like;
 import static com.farmdora.farmdora.entity.QOption.option;
 import static com.farmdora.farmdora.entity.QOrderOption.orderOption;
+import static com.farmdora.farmdora.entity.QReview.review;
 import static com.farmdora.farmdora.entity.QSale.sale;
-import static com.farmdora.farmdora.entity.QSaleType.saleType;
-import static com.farmdora.farmdora.entity.QSaleTypeBig.saleTypeBig;
+import static com.farmdora.farmdora.entity.QSaleFile.saleFile;
 
-import com.farmdora.farmdora.order.dto.Sort;
-import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
-import com.farmdora.farmdora.sale.dto.SaleStatus;
-import com.farmdora.farmdora.sale.dto.querydsl.QSaleDto;
-import com.farmdora.farmdora.sale.dto.querydsl.QSaleOrderCountDto;
-import com.farmdora.farmdora.sale.dto.querydsl.SaleDto;
-import com.farmdora.farmdora.sale.dto.querydsl.SaleOrderCountDto;
+import com.farmdora.farmdora.sale.dto.QSaleSummaryDto;
+import com.farmdora.farmdora.sale.dto.SaleSortType;
+import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import com.farmdora.farmdora.sale.repository.CustomSaleRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
-import org.springframework.util.StringUtils;
 
 @Slf4j
 public class CustomSaleRepositoryImpl implements CustomSaleRepository {
@@ -37,115 +33,61 @@ public class CustomSaleRepositoryImpl implements CustomSaleRepository {
     }
 
     @Override
-    public Page<SaleDto> searchSales(Integer sellerId, SaleSearchRequestDto searchCondition, Pageable pageable) {
-        List<SaleDto> sales = queryFactory
-                .select(
-                        new QSaleDto(sale.id, sale.title, sale.isBlind, option.price.min(), option.quantity.sum())
-                )
+    public Page<SaleSummaryDto> searchSalesByCategories(Integer userId, Short bigTypeId, Short typeId,
+                                                        SaleSortType sortType, Pageable pageable) {
+        List<SaleSummaryDto> sales = queryFactory
+                .select(new QSaleSummaryDto(
+                        sale.id,
+                        sale.title,
+                        option.price.min(),
+                        JPAExpressions
+                                .selectOne()
+                                .from(like)
+                                .where(like.sale.eq(sale)
+                                        .and(like.user.userId.eq(userId)))
+                                .exists(),
+                        saleFile.saveFile.max()))
                 .from(sale)
-                .join(option).on(option.sale.eq(sale))
-                .join(saleType).on(sale.type.eq(saleType))
-                .join(saleTypeBig).on(saleType.saleTypeBig.eq(saleTypeBig))
-                .where(
-                        sale.seller.id.eq(sellerId),
-                        titleContains(searchCondition.getKeyword()),
-                        isBlindEq(searchCondition.getFilters()),
-                        isSmallTypeEq(searchCondition.getTypeId()),
-                        isBigTypeEq(searchCondition.getTypeBigId())
-                )
-                .groupBy(sale.id, sale.title, sale.isBlind, sale.createdDate)
-                .orderBy(
-                        salesCreatedDateOrderBy(searchCondition.getSort()),
-                        salesIdOrderBy(searchCondition.getSort())
-                )
-                .limit(pageable.getPageSize())
+                .leftJoin(option).on(option.sale.eq(sale))
+                .leftJoin(orderOption).on(orderOption.option.eq(option))
+                .leftJoin(review).on(review.sale.eq(sale))
+                .leftJoin(saleFile).on(saleFile.sale.eq(sale).and(saleFile.isMain.isTrue()))
+                .leftJoin(like).on(like.sale.eq(sale))
+                .where(categoryCondition(typeId, bigTypeId))
+                .groupBy(sale.id, sale.title)
+                .orderBy(getSaleOrderSpecifier(sortType), sale.id.desc())
                 .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
 
-        JPAQuery<Long> countQuery = createCountQuery(sellerId, searchCondition);
+        log.info("카테고리 상품 목록: {}", sales);
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(sale.count())
+                .from(sale)
+                .where(categoryCondition(typeId, bigTypeId));
 
         return PageableExecutionUtils.getPage(sales, pageable, countQuery::fetchOne);
     }
 
-    @Override
-    public List<SaleOrderCountDto> searchSaleOrderCount(List<Integer> saleIds) {
-        return queryFactory
-                .select(new QSaleOrderCountDto(sale.id, orderOption.id.count()))
-                .from(orderOption)
-                .join(option).on(option.id.eq(orderOption.option.id))
-                .where(sale.id.in(saleIds))
-                .groupBy(sale.id)
-                .fetch();
-    }
-
-    private JPAQuery<Long> createCountQuery(Integer sellerId, SaleSearchRequestDto searchCondition) {
-        return queryFactory
-                .select(sale.countDistinct())
-                .from(sale)
-                .join(option).on(option.sale.eq(sale))
-                .join(saleType).on(sale.type.eq(saleType))
-                .join(saleTypeBig).on(saleType.saleTypeBig.eq(saleTypeBig))
-                .where(
-                        sale.seller.id.eq(sellerId),
-                        titleContains(searchCondition.getKeyword()),
-                        isBlindEq(searchCondition.getFilters()),
-                        isSmallTypeEq(searchCondition.getTypeId()),
-                        isBigTypeEq(searchCondition.getTypeBigId())
-                );
-    }
-
-    private BooleanExpression titleContains(String keyword) {
-        if (StringUtils.hasText(keyword)) {
-            return sale.title.contains(keyword);
-        }
-        return null;
-    }
-
-    private BooleanExpression isBlindEq(Set<SaleStatus> filters) {
-        if (filters == null || filters.isEmpty()) {
-            return null;
-        }
-
-        boolean hasInstock = filters.contains(SaleStatus.INSTOCK);
-        boolean hasPreorder = filters.contains(SaleStatus.PREORDER);
-
-        if (hasPreorder && hasInstock) {
-            return null;
-        } else if (hasPreorder) {
-            return sale.isBlind.isTrue();
-        } else if (hasInstock) {
-            return sale.isBlind.isFalse();
-        }
-        return null;
-    }
-
-    private BooleanExpression isSmallTypeEq(Short typeId) {
+    private BooleanExpression categoryCondition(Short typeId, Short bigTypeId) {
         if (typeId != null) {
             return sale.type.id.eq(typeId);
+        } else if (bigTypeId != null) {
+            return sale.type.saleTypeBig.id.eq(bigTypeId);
         }
         return null;
     }
 
-    private BooleanExpression isBigTypeEq(Short typeBigId) {
-        if (typeBigId != null) {
-            return sale.type.saleTypeBig.id.eq(typeBigId);
-        }
-        return null;
-    }
-
-    private OrderSpecifier<?> salesCreatedDateOrderBy(Sort sort) {
-        if (sort.equals(Sort.OLDEST)) {
-            return sale.createdDate.asc();
-        } else {
-            return sale.createdDate.desc();
-        }
-    }
-
-    private OrderSpecifier<?> salesIdOrderBy(Sort sort) {
-        if (sort.equals(Sort.OLDEST)) {
-            return sale.id.asc();
-        } else {
-            return sale.id.desc();
-        }
+    private OrderSpecifier<?> getSaleOrderSpecifier(SaleSortType sort) {
+        return switch (sort) {
+            case ORDER_DESC -> orderOption.id.count().desc();
+            case ORDER_ASC -> orderOption.id.count().asc();
+            case REVIEW_DESC -> review.id.count().desc();
+            case PRICE_ASC -> option.price.min().asc();
+            case PRICE_DESC -> option.price.min().desc();
+            case RECOMMEND -> like.id.count().desc();
+            default -> sale.id.desc();
+        };
     }
 }

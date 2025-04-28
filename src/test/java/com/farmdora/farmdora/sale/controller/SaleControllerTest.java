@@ -1,6 +1,7 @@
 package com.farmdora.farmdora.sale.controller;
 
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_RELATED_SALES_SUCCESS;
+import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALES_BY_CATEGORIES;
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALES_RANK;
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALE_DETAIL_SUCCESS;
 import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_QUESTION_SUCCESS;
@@ -8,6 +9,7 @@ import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_REVIEW
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyShort;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -22,6 +24,8 @@ import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto.OptionDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
+import com.farmdora.farmdora.sale.dto.SaleSortType;
+import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -234,5 +238,29 @@ public class SaleControllerTest extends ControllerTest {
                 .andExpect(jsonPath("$.data.hasNext", equalTo(false)))
                 .andExpect(jsonPath("$.data.currentPage", equalTo(0)))
                 .andExpect(jsonPath("$.data.totalElements", equalTo(100)));
+    }
+
+    @Test
+    @DisplayName("카테고리의 상품 목록 조회 API 테스트")
+    void testGetSalesByType() throws Exception {
+        // given
+        PageResponseDto<SaleSummaryDto> sales = new PageResponseDto<>();
+        sales.setPageSize(10);
+        sales.setHasPrevious(false);
+        sales.setHasNext(false);
+        sales.setCurrentPage(0);
+        sales.setPageSize(10);
+        sales.setTotalElements(100L);
+        when(saleService.getSalesByCategory(anyInt(), anyShort(), anyShort(), any(SaleSortType.class), any(Pageable.class))).thenReturn(sales);
+
+        // when
+        // then
+        mvc.perform(get("/sale/type")
+                        .param("bigTypeId", "2")
+                        .param("typeId", "6")
+                        .param("sort", "RECOMMEND"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", equalTo(200)))
+                .andExpect(jsonPath("$.message", equalTo(GET_SALES_BY_CATEGORIES.getMessage())));
     }
 }

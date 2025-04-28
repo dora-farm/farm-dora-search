@@ -69,8 +69,8 @@ class SaleRepositoryTest {
                 em.persist(review2);
             } else {
                 Like like = Like.builder()
-                        .saleId(sale.getId())
-                        .userId(user.getUserId())
+                        .sale(sale)
+                        .user(user)
                         .build();
                 em.persist(like);
 
