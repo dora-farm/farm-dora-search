@@ -1,5 +1,7 @@
 package com.farmdora.farmdora;
 
+import com.farmdora.farmdora.admin.controller.UserController;
+import com.farmdora.farmdora.admin.service.UserService;
 import com.farmdora.farmdora.order.controller.OrderController;
 import com.farmdora.farmdora.order.service.OrderService;
 import com.farmdora.farmdora.opinion.controller.OpinionController;
@@ -18,7 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
         SaleController.class,
         OpinionController.class,
         SellerSaleController.class,
-        SaleController.class
+        SaleController.class,
+        UserController.class
 })
 public abstract class ControllerTest {
 
@@ -36,4 +39,7 @@ public abstract class ControllerTest {
 
     @MockitoBean
     protected OpinionService opinionService;
+
+    @MockitoBean
+    protected UserService userService;
 }
