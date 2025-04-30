@@ -10,8 +10,11 @@ import com.farmdora.farmdora.sale.controller.SaleController;
 import com.farmdora.farmdora.sale.controller.SellerSaleController;
 import com.farmdora.farmdora.sale.service.SaleService;
 import com.farmdora.farmdora.sale.service.SellerSaleService;
+import com.farmdora.farmdora.security.TestSecurityConfig;
+import com.farmdora.farmdora.security.WithCustomMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,6 +26,8 @@ import org.springframework.test.web.servlet.MockMvc;
         SaleController.class,
         UserController.class
 })
+@WithCustomMockUser
+@Import({TestSecurityConfig.class})
 public abstract class ControllerTest {
 
     @Autowired

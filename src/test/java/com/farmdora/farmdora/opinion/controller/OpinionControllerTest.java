@@ -92,7 +92,7 @@ class OpinionControllerTest extends ControllerTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<ReviewResponseDto> reviewPage = new PageImpl<>(reviews, pageable, 2);
         PageResponseDto<ReviewResponseDto> result = new PageResponseDto<>(reviews, reviewPage);
-        when(opinionService.searchReviews(any(OpinionSearchRequestDto.class), any(Pageable.class))).thenReturn(result);
+        when(opinionService.searchReviews(anyInt(), any(OpinionSearchRequestDto.class), any(Pageable.class))).thenReturn(result);
 
         // when
         // then
