@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 public class CustomReviewRepositoryImpl implements CustomReviewRepository {
@@ -34,7 +35,7 @@ public class CustomReviewRepositoryImpl implements CustomReviewRepository {
     }
 
     @Override
-    public Page<ReviewResponseDto> searchReviews(OpinionSearchRequestDto searchCondition, Pageable pageable) {
+    public Page<ReviewResponseDto> searchReviews(Integer userId, OpinionSearchRequestDto searchCondition, Pageable pageable) {
         List<ReviewResponseDto> reviews = queryFactory
                 .select(
                         new QReviewResponseDto(review.id, sale.title, review.content, user.name, review.createdDate, review.score)
@@ -44,7 +45,7 @@ public class CustomReviewRepositoryImpl implements CustomReviewRepository {
                 .join(order).on(review.order.eq(order))
                 .join(user).on(order.user.eq(user))
                 .where(
-                        sale.seller.id.eq(searchCondition.getSellerId()),
+                        sale.seller.user.userId.eq(userId),
                         keywordContains(searchCondition.getSearchType(), searchCondition.getKeyword()),
                         dateBetween(searchCondition.getStartDate(), searchCondition.getEndDate(),
                                 searchCondition.getSearchPeriod())
@@ -63,7 +64,7 @@ public class CustomReviewRepositoryImpl implements CustomReviewRepository {
                 .join(order).on(review.order.eq(order))
                 .join(user).on(order.user.eq(user))
                 .where(
-                        sale.seller.id.eq(searchCondition.getSellerId()),
+                        sale.seller.user.userId.eq(userId),
                         keywordContains(searchCondition.getSearchType(), searchCondition.getKeyword()),
                         dateBetween(searchCondition.getStartDate(), searchCondition.getEndDate(), searchCondition.getSearchPeriod())
                 );
@@ -74,7 +75,7 @@ public class CustomReviewRepositoryImpl implements CustomReviewRepository {
     }
 
     private BooleanExpression keywordContains(SearchType searchType, String keyword) {
-        if (searchType != null && keyword != null) {
+        if (searchType != null && StringUtils.hasText(keyword)) {
             if (searchType.equals(SearchType.PRODUCT)) {
                 return sale.title.contains(keyword);
             } else if (searchType.equals(SearchType.BUYER)){

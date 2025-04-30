@@ -6,5 +6,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface CustomReviewRepository {
-    Page<ReviewResponseDto> searchReviews(OpinionSearchRequestDto searchCondition, Pageable pageable);
+    Page<ReviewResponseDto> searchReviews(Integer userId, OpinionSearchRequestDto searchCondition, Pageable pageable);
 }
