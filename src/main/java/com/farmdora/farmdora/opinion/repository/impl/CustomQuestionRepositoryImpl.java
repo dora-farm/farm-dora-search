@@ -2,8 +2,9 @@ package com.farmdora.farmdora.opinion.repository.impl;
 
 import static com.farmdora.farmdora.entity.QQuestion.question;
 import static com.farmdora.farmdora.entity.QSale.sale;
-import static com.farmdora.farmdora.entity.QUser.user;
+import static com.farmdora.farmdora.entity.QSeller.seller;
 
+import com.farmdora.farmdora.entity.QUser;
 import com.farmdora.farmdora.order.dto.SearchPeriod;
 import com.farmdora.farmdora.order.dto.SearchType;
 import com.farmdora.farmdora.order.dto.Sort;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 public class CustomQuestionRepositoryImpl implements CustomQuestionRepository {
@@ -34,7 +36,7 @@ public class CustomQuestionRepositoryImpl implements CustomQuestionRepository {
     }
 
     @Override
-    public Page<QuestionResponseDto> searchQuestions(Integer sellerId, OpinionSearchRequestDto searchCondition, Pageable pageable) {
+    public Page<QuestionResponseDto> searchQuestions(Integer userId, OpinionSearchRequestDto searchCondition, Pageable pageable) {
         List<QuestionResponseDto> questions = queryFactory
                 .select(new QQuestionResponseDto(
                         question.id,
@@ -46,7 +48,7 @@ public class CustomQuestionRepositoryImpl implements CustomQuestionRepository {
                 ))
                 .from(question)
                 .where(
-                        sale.seller.id.eq(sellerId),
+                        sale.seller.user.userId.eq(userId),
                         keywordContains(searchCondition.getSearchType(), searchCondition.getKeyword()),
                         dateBetween(searchCondition.getStartDate(), searchCondition.getEndDate(),
                                 searchCondition.getSearchPeriod()),
@@ -58,14 +60,18 @@ public class CustomQuestionRepositoryImpl implements CustomQuestionRepository {
                 .fetch();
 
         log.info("문의 목록: {}", questions);
+        QUser sellerUser = new QUser("sellerUser");
+        QUser buyer = new QUser("buyer");
 
         JPAQuery<Long> countQuery = queryFactory
                 .select(question.count())
                 .from(question)
-                .join(user).on(question.user.eq(user))
-                .join(sale).on(question.sale.eq(sale))
+                .join(question.sale, sale)
+                .join(question.user, sellerUser)
+                .join(sale.seller, seller)
+                .join(seller.user, buyer)
                 .where(
-                        question.sale.seller.id.eq(sellerId),
+                        sellerUser.userId.eq(userId),
                         keywordContains(searchCondition.getSearchType(), searchCondition.getKeyword()),
                         dateBetween(searchCondition.getStartDate(), searchCondition.getEndDate(),
                                 searchCondition.getSearchPeriod()),
@@ -76,7 +82,7 @@ public class CustomQuestionRepositoryImpl implements CustomQuestionRepository {
     }
 
     private BooleanExpression keywordContains(SearchType searchType, String keyword) {
-        if (searchType != null && keyword != null) {
+        if (searchType != null && StringUtils.hasText(keyword)) {
             if (searchType.equals(SearchType.PRODUCT)) {
                 return sale.title.contains(keyword);
             } else if (searchType.equals(SearchType.BUYER)){
