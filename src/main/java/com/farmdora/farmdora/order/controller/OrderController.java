@@ -7,6 +7,7 @@ import com.farmdora.farmdora.order.dto.OrderSearchRequestDto;
 import com.farmdora.farmdora.order.dto.OrderSearchResponseDto;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.order.service.OrderService;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -24,11 +25,11 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchOrders(Integer userId,
+    public ResponseEntity<?> searchOrders(Principal principal,
                                           OrderSearchRequestDto searchCondition,
                                           @PageableDefault Pageable pageable) {
-        // TODO 스프링 시큐리티 구현 후 userId 가져오기
-        PageResponseDto<OrderSearchResponseDto> orders = orderService.searchOrders(userId, searchCondition, pageable);
+        String userId = principal.getName();
+        PageResponseDto<OrderSearchResponseDto> orders = orderService.searchOrders(Integer.parseInt(userId), searchCondition, pageable);
         return ResponseEntity
                 .ok()
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_ORDER_SUCCESS.getMessage(), orders));

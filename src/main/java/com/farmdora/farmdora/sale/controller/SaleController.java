@@ -17,6 +17,7 @@ import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleSortType;
 import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import com.farmdora.farmdora.sale.service.SaleService;
+import java.security.Principal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -36,18 +37,18 @@ public class SaleController {
     private final SaleService saleService;
 
     @GetMapping("/{saleId}")
-    public ResponseEntity<?> getSaleDetail(Integer userId, @PathVariable("saleId") Integer saleId) {
-        // TODO 스프링 시큐리티 구현 후 userId 가져오기
+    public ResponseEntity<?> getSaleDetail(Principal principal, @PathVariable("saleId") Integer saleId) {
+        Integer userId = Integer.parseInt(principal.getName());
         SaleDetailDto saleDetail = saleService.getSaleDetail(userId, saleId);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_SALE_DETAIL_SUCCESS.getMessage(), saleDetail));
     }
 
     @GetMapping("/related/{saleId}")
-    public ResponseEntity<?> getRelatedSales(Integer userId,
+    public ResponseEntity<?> getRelatedSales(Principal principal,
                                              @PathVariable("saleId") Integer saleId,
                                              @PageableDefault Pageable pageable) {
-        // TODO 스프링 시큐리티 구현 후 userId 가져오기
+        Integer userId = Integer.parseInt(principal.getName());
         List<SaleRelatedDto> relatedSales = saleService.getRelatedSales(userId, saleId, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_RELATED_SALES_SUCCESS.getMessage(), relatedSales));
@@ -56,7 +57,6 @@ public class SaleController {
     @GetMapping("/review/{saleId}")
     public ResponseEntity<?> getSaleReviews(@PathVariable("saleId") Integer saleId,
                                             @PageableDefault Pageable pageable) {
-        // TODO 스프링 시큐리티 구현 후 userId 가져오기
         PageResponseDto<ReviewDetailDto> reviews = saleService.getSaleReviews(saleId, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_REVIEWS_SUCCESS.getMessage(), reviews));
@@ -78,12 +78,13 @@ public class SaleController {
     }
 
     @GetMapping("/type")
-    public ResponseEntity<?> getSalesByType(@RequestParam Short bigTypeId,
-                                            @RequestParam Short typeId,
-                                            @RequestParam SaleSortType sort,
+    public ResponseEntity<?> getSalesByType(Principal principal,
+                                            @RequestParam(required = false) Short bigTypeId,
+                                            @RequestParam(required = false) Short typeId,
+                                            @RequestParam(required = false) SaleSortType sort,
                                             @PageableDefault(size = 20) Pageable pageable) {
-        // TODO 스프링 시큐리티 구현 후 userId 가져오기
-        PageResponseDto<SaleSummaryDto> sales = saleService.getSalesByCategory(1, bigTypeId, typeId, sort, pageable);
+        Integer userId = Integer.parseInt(principal.getName());
+        PageResponseDto<SaleSummaryDto> sales = saleService.getSalesByCategory(userId, bigTypeId, typeId, sort, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_SALES_BY_CATEGORIES.getMessage(), sales));
     }
