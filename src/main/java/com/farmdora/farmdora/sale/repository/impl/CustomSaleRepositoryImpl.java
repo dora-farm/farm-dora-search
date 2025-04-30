@@ -18,12 +18,10 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
-@Slf4j
 public class CustomSaleRepositoryImpl implements CustomSaleRepository {
 
     private final JPAQueryFactory queryFactory;
@@ -60,8 +58,6 @@ public class CustomSaleRepositoryImpl implements CustomSaleRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        log.info("카테고리 상품 목록: {}", sales);
-
         JPAQuery<Long> countQuery = queryFactory
                 .select(sale.count())
                 .from(sale)
@@ -71,9 +67,12 @@ public class CustomSaleRepositoryImpl implements CustomSaleRepository {
     }
 
     private BooleanExpression categoryCondition(Short typeId, Short bigTypeId) {
-        if (typeId != null) {
+        boolean hasType = typeId != null;
+        boolean hasBigType = bigTypeId != null;
+
+        if (hasType) {
             return sale.type.id.eq(typeId);
-        } else if (bigTypeId != null) {
+        } else if (hasBigType) {
             return sale.type.saleTypeBig.id.eq(bigTypeId);
         }
         return null;
