@@ -37,7 +37,7 @@ public class CustomSellerSaleRepositoryImpl implements CustomSellerSaleRepositor
     }
 
     @Override
-    public Page<SaleDto> searchSales(Integer sellerId, SaleSearchRequestDto searchCondition, Pageable pageable) {
+    public Page<SaleDto> searchSales(Integer userId, SaleSearchRequestDto searchCondition, Pageable pageable) {
         List<SaleDto> sales = queryFactory
                 .select(
                         new QSaleDto(sale.id, sale.title, sale.isBlind, option.price.min(), option.quantity.sum())
@@ -47,7 +47,7 @@ public class CustomSellerSaleRepositoryImpl implements CustomSellerSaleRepositor
                 .join(saleType).on(sale.type.eq(saleType))
                 .join(saleTypeBig).on(saleType.saleTypeBig.eq(saleTypeBig))
                 .where(
-                        sale.seller.id.eq(sellerId),
+                        sale.seller.user.userId.eq(userId),
                         titleContains(searchCondition.getKeyword()),
                         isBlindEq(searchCondition.getFilters()),
                         isSmallTypeEq(searchCondition.getTypeId()),
@@ -62,7 +62,7 @@ public class CustomSellerSaleRepositoryImpl implements CustomSellerSaleRepositor
                 .offset(pageable.getOffset())
                 .fetch();
 
-        JPAQuery<Long> countQuery = createCountQuery(sellerId, searchCondition);
+        JPAQuery<Long> countQuery = createCountQuery(userId, searchCondition);
 
         return PageableExecutionUtils.getPage(sales, pageable, countQuery::fetchOne);
     }
@@ -78,7 +78,7 @@ public class CustomSellerSaleRepositoryImpl implements CustomSellerSaleRepositor
                 .fetch();
     }
 
-    private JPAQuery<Long> createCountQuery(Integer sellerId, SaleSearchRequestDto searchCondition) {
+    private JPAQuery<Long> createCountQuery(Integer userId, SaleSearchRequestDto searchCondition) {
         return queryFactory
                 .select(sale.countDistinct())
                 .from(sale)
@@ -86,7 +86,7 @@ public class CustomSellerSaleRepositoryImpl implements CustomSellerSaleRepositor
                 .join(saleType).on(sale.type.eq(saleType))
                 .join(saleTypeBig).on(saleType.saleTypeBig.eq(saleTypeBig))
                 .where(
-                        sale.seller.id.eq(sellerId),
+                        sale.seller.user.userId.eq(userId),
                         titleContains(searchCondition.getKeyword()),
                         isBlindEq(searchCondition.getFilters()),
                         isSmallTypeEq(searchCondition.getTypeId()),
