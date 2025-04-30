@@ -23,8 +23,8 @@ public class SellerSaleService {
     private final SaleMapper saleMapper;
 
     @Transactional(readOnly = true)
-    public PageResponseDto<SaleSearchResponseDto> searchSales(Integer sellerId, SaleSearchRequestDto searchCondition, Pageable pageable) {
-        Page<SaleDto> salePage = saleRepository.searchSales(sellerId, searchCondition, pageable);
+    public PageResponseDto<SaleSearchResponseDto> searchSales(Integer userId, SaleSearchRequestDto searchCondition, Pageable pageable) {
+        Page<SaleDto> salePage = saleRepository.searchSales(userId, searchCondition, pageable);
         List<SaleDto> sales = salePage.getContent();
         List<Integer> saleIds = getSaleIds(sales);
         List<SaleOrderCountDto> orderCounts = getOrderCounts(saleIds);
