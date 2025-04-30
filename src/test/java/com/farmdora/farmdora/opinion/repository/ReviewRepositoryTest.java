@@ -36,18 +36,20 @@ public class ReviewRepositoryTest {
     @DisplayName("판매자의 리뷰 목록 검색 QueryDsl 테스트")
     void testSearchReviews() {
         // given
-        Seller seller = new Seller();
+        User user = User.builder()
+                .name("user")
+                .build();
+        em.persist(user);
+
+        Seller seller = Seller.builder()
+                .user(user)
+                .build();
         em.persist(seller);
 
         Sale sale = Sale.builder()
                 .title("sale")
                 .build();
         em.persist(sale);
-
-        User user = User.builder()
-                .name("user")
-                .build();
-        em.persist(user);
 
         Order order = Order.builder()
                 .user(user)
@@ -65,13 +67,12 @@ public class ReviewRepositoryTest {
 
         // when
         OpinionSearchRequestDto searchCondition = OpinionSearchRequestDto.builder()
-                .sellerId(seller.getId())
                 .searchType(SearchType.PRODUCT)
                 .keyword("sale")
                 .searchPeriod(SearchPeriod.WEEK)
                 .build();
         Pageable pageable = PageRequest.of(0, 10);
-        Page<ReviewResponseDto> result = reviewRepository.searchReviews(searchCondition, pageable);
+        Page<ReviewResponseDto> result = reviewRepository.searchReviews(user.getUserId(), searchCondition, pageable);
 
         // then
         System.out.println(result.getContent());

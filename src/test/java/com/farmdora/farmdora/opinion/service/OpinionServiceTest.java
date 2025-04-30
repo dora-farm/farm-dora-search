@@ -104,7 +104,7 @@ class OpinionServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<ReviewResponseDto> reviewPage = new PageImpl<>(reviews, pageable, 2);
 
-        when(reviewRepository.searchReviews(any(OpinionSearchRequestDto.class), any(Pageable.class))).thenReturn(reviewPage);
+        when(reviewRepository.searchReviews(anyInt(), any(OpinionSearchRequestDto.class), any(Pageable.class))).thenReturn(reviewPage);
 
         // when
         OpinionSearchRequestDto searchCondition = OpinionSearchRequestDto.builder()
@@ -113,7 +113,7 @@ class OpinionServiceTest {
                 .searchPeriod(SearchPeriod.TODAY)
                 .sort(Sort.OLDEST)
                 .build();
-        PageResponseDto<ReviewResponseDto> result = opinionService.searchReviews(searchCondition, pageable);
+        PageResponseDto<ReviewResponseDto> result = opinionService.searchReviews(1, searchCondition, pageable);
 
         // then
         assertThat(result.getContents().size()).isEqualTo(2);
