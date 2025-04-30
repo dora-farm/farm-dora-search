@@ -20,14 +20,14 @@ public class OpinionService {
     private final ReviewRepository reviewRepository;
 
     @Transactional(readOnly = true)
-    public PageResponseDto<QuestionResponseDto> searchQuestions(Integer sellerId, OpinionSearchRequestDto searchCondition, Pageable pageable) {
-        Page<QuestionResponseDto> questions = questionRepository.searchQuestions(sellerId, searchCondition, pageable);
+    public PageResponseDto<QuestionResponseDto> searchQuestions(Integer userId, OpinionSearchRequestDto searchCondition, Pageable pageable) {
+        Page<QuestionResponseDto> questions = questionRepository.searchQuestions(userId, searchCondition, pageable);
         return new PageResponseDto<>(questions.getContent(), questions);
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto<ReviewResponseDto> searchReviews(OpinionSearchRequestDto searchCondition, Pageable pageable) {
-        Page<ReviewResponseDto> reviews = reviewRepository.searchReviews(searchCondition, pageable);
+    public PageResponseDto<ReviewResponseDto> searchReviews(Integer userId, OpinionSearchRequestDto searchCondition, Pageable pageable) {
+        Page<ReviewResponseDto> reviews = reviewRepository.searchReviews(userId, searchCondition, pageable);
         return new PageResponseDto<>(reviews.getContent(), reviews);
     }
 }
