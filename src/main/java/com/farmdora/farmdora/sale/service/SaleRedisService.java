@@ -39,7 +39,6 @@ public class SaleRedisService {
         int total = content.size();
 
         for (int page = 0; page < (total + PAGE_SIZE - 1) / PAGE_SIZE; page++) {
-            log.info("실행중...");
             int start = page * PAGE_SIZE;
             int end = Math.min(start + PAGE_SIZE, total);
 
