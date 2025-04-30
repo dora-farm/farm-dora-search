@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface QuestionRepository extends JpaRepository<Question, Integer>, CustomQuestionRepository {
 
-    @Query("SELECT new com.farmdora.farmdora.sale.dto.QuestionResponseDto(q.id, q.title, u.name, q.isProcess, q.createdDate) "
+    @Query("SELECT new com.farmdora.farmdora.sale.dto.QuestionResponseDto(q.id, q.title, u.name, q.content, q.answer, q.isProcess, q.createdDate) "
             + "FROM Question q JOIN q.user u "
             + "WHERE q.sale = :sale")
     Page<QuestionResponseDto> findQuestionsBySaleId(@Param("sale")Sale sale, Pageable pageable);

@@ -13,6 +13,8 @@ public class QuestionResponseDto {
     private Integer id;
     private String title;
     private String writer;
+    private String content;
+    private String answer;
     private boolean isProcess;
     private LocalDateTime createdDate;
 }
