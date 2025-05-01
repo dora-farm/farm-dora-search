@@ -15,7 +15,8 @@ public enum SuccessMessage {
     GET_SALES_RANK("상품 랭킹 정보 조회에 성공하였습니다."),
     GET_SALES_BY_CATEGORIES("카테고리의 상품 목록 조회에 성공하였습니다."),
     SEARCH_USERS_SUCCESS("사용자 목록 조회에 성공하였습니다."),
-    GET_CATEGORIES_SUCCESS("카테고리 목록 조회에 성공하였습니다.");
+    GET_CATEGORIES_SUCCESS("카테고리 목록 조회에 성공하였습니다."),
+    GET_POPUPS_SUCCESS("팝업 목록 조회에 성공하였습니다.");
 
     private final String message;
 }
