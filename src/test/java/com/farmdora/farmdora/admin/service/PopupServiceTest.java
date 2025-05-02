@@ -6,7 +6,9 @@ import static org.mockito.Mockito.when;
 
 import com.farmdora.farmdora.admin.dto.PopupSearchRequestDto;
 import com.farmdora.farmdora.admin.dto.PopupSearchResponseDto;
+import com.farmdora.farmdora.admin.dto.PopupTypeDto;
 import com.farmdora.farmdora.admin.repository.PopupRepository;
+import com.farmdora.farmdora.admin.repository.PopupTypeRepository;
 import com.farmdora.farmdora.common.NcpImageProperties;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.entity.Popup;
@@ -29,6 +31,9 @@ class PopupServiceTest {
 
     @Mock
     private PopupRepository popupRepository;
+
+    @Mock
+    private PopupTypeRepository popupTypeRepository;
 
     @Mock
     private NcpImageProperties ncpImageProperties;
@@ -68,5 +73,28 @@ class PopupServiceTest {
 
         // then
         assertThat(result.getContents().size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("팝업 타입 목록 조회 서비스 레이어 테스트")
+    void testGetPopupTypes() {
+        // given
+        List<PopupType> popupTypes = List.of(
+                PopupType.builder()
+                        .id(Short.valueOf("1"))
+                        .name("이벤트1")
+                        .build(),
+                PopupType.builder()
+                        .id(Short.valueOf("2"))
+                        .name("이벤트2")
+                        .build()
+        );
+        when(popupTypeRepository.findAll()).thenReturn(popupTypes);
+
+        // when
+        List<PopupTypeDto> result = popupService.getPopupTypes();
+
+        // then
+        assertThat(result.size()).isEqualTo(2);
     }
 }
