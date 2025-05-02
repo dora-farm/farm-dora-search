@@ -1,12 +1,15 @@
 package com.farmdora.farmdora.admin.controller;
 
 import static com.farmdora.farmdora.common.response.SuccessMessage.GET_POPUPS_SUCCESS;
+import static com.farmdora.farmdora.common.response.SuccessMessage.GET_POPUP_TYPES_SUCCESS;
 
 import com.farmdora.farmdora.admin.dto.PopupSearchRequestDto;
 import com.farmdora.farmdora.admin.dto.PopupSearchResponseDto;
+import com.farmdora.farmdora.admin.dto.PopupTypeDto;
 import com.farmdora.farmdora.admin.service.PopupService;
 import com.farmdora.farmdora.common.response.HttpResponse;
 import com.farmdora.farmdora.common.response.PageResponseDto;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -28,5 +31,12 @@ public class PopupController {
         PageResponseDto<PopupSearchResponseDto> popups = popupService.searchPopups(searchCondition, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_POPUPS_SUCCESS.getMessage(), popups));
+    }
+
+    @GetMapping("/popup/type")
+    public ResponseEntity<?> getPopupTypes() {
+        List<PopupTypeDto> popupTypes = popupService.getPopupTypes();
+        return ResponseEntity.ok()
+                .body(new HttpResponse(HttpStatus.OK, GET_POPUP_TYPES_SUCCESS.getMessage(), popupTypes));
     }
 }
