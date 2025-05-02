@@ -38,7 +38,7 @@ public class CustomReviewRepositoryImpl implements CustomReviewRepository {
     public Page<ReviewResponseDto> searchReviews(Integer userId, OpinionSearchRequestDto searchCondition, Pageable pageable) {
         List<ReviewResponseDto> reviews = queryFactory
                 .select(
-                        new QReviewResponseDto(review.id, sale.title, review.content, user.name, review.createdDate, review.score)
+                        new QReviewResponseDto(review.id, sale.title, review.content, user.name, review.reply, review.createdDate, review.score)
                 )
                 .from(sale)
                 .join(review).on(review.sale.eq(sale))
