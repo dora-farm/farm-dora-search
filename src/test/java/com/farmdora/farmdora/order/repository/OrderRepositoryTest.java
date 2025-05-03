@@ -74,6 +74,7 @@ class OrderRepositoryTest {
 
         seller = Seller.builder()
                 .name("홍길동")
+                .user(user)
                 .build();
         em.persist(seller);
 

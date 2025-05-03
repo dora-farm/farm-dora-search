@@ -17,7 +17,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OpinionSearchRequestDto {
-    private Integer sellerId;  // TODO JWT 구현완료 후 제거 예정
     private SearchType searchType;
     private String keyword;
     private SearchPeriod searchPeriod;

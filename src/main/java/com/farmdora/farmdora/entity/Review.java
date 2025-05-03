@@ -38,5 +38,7 @@ public class Review extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    private String reply;
+
     private byte score;
 }

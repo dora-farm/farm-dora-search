@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyShort;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,6 +31,7 @@ import com.farmdora.farmdora.sale.dto.SaleSortType;
 import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
 import com.farmdora.farmdora.sale.repository.OptionRepository;
+import com.farmdora.farmdora.sale.repository.ReviewFileRepository;
 import com.farmdora.farmdora.sale.repository.SaleFileRepository;
 import com.farmdora.farmdora.sale.repository.SaleRepository;
 import java.time.LocalDateTime;
@@ -68,6 +70,9 @@ class SaleServiceTest {
 
     @Mock
     private QuestionRepository questionRepository;
+
+    @Mock
+    private ReviewFileRepository reviewFileRepository;
 
     @Mock
     private SaleRedisService saleRedisService;
@@ -241,6 +246,8 @@ class SaleServiceTest {
             Pageable pageable = PageRequest.of(0, 10);
             PageImpl<Review> reviewPages = new PageImpl<>(reviews, pageable, 2);
             when(reviewRepository.findAllBySale(any(Sale.class), any(Pageable.class))).thenReturn(reviewPages);
+
+            when(reviewFileRepository.findByReviewIdIn(anyList())).thenReturn(new ArrayList<>());
 
             // when
             PageResponseDto<ReviewDetailDto> result = saleService.getSaleReviews(1, pageable);

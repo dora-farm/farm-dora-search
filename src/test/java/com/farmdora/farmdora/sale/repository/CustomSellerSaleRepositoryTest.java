@@ -9,6 +9,7 @@ import com.farmdora.farmdora.entity.Sale;
 import com.farmdora.farmdora.entity.SaleType;
 import com.farmdora.farmdora.entity.SaleTypeBig;
 import com.farmdora.farmdora.entity.Seller;
+import com.farmdora.farmdora.entity.User;
 import com.farmdora.farmdora.order.dto.Sort;
 import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
 import com.farmdora.farmdora.sale.dto.SaleStatus;
@@ -46,7 +47,12 @@ class CustomSellerSaleRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        seller = new Seller();
+        User user = new User();
+        em.persist(user);
+
+        seller = Seller.builder()
+                .user(user)
+                .build();
         em.persist(seller);
 
         bigType = SaleTypeBig.builder()
@@ -99,7 +105,7 @@ class CustomSellerSaleRepositoryTest {
     @DisplayName("상품 목록 검색 및 조회 테스트")
     void testSearchSales() {
         // given
-        Integer sellerId = seller.getId();
+        Integer sellerId = seller.getUser().getUserId();
         System.out.println(sellerId);
         SaleSearchRequestDto searchCondition = SaleSearchRequestDto.builder()
                 .keyword("상추")

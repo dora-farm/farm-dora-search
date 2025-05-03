@@ -18,6 +18,14 @@ spring:
         highlight_sql: true
         use_sql_comments: true
 
+  jwt:
+    secret: ENC(AJv6LokZXWCLSDdDEFT1UGe19935JohjmPnbyDPFNQWa+WgVgEaBrsg3Fo8Xo8Myj3KHBd5e5Ka5pLS8nyOm2NNBdvwSAbjfBlpcZENOkyA=)
+
+jasypt:
+  encryptor:
+    password: ${key}
+    bean: jasyptEncryptor
+
 ncp:
   image:
     path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/product/

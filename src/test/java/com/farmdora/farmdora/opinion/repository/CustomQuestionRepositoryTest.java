@@ -37,10 +37,11 @@ class CustomQuestionRepositoryTest {
     private QuestionRepository questionRepository;
 
     private Seller seller;
+    private User user;
 
     @BeforeEach
     void setUp() {
-        User user = User.builder()
+        user = User.builder()
                 .phoneNum("010-1234-5678")
                 .name("user")
                 .build();
@@ -48,6 +49,7 @@ class CustomQuestionRepositoryTest {
 
         seller = Seller.builder()
                 .name("seller")
+                .user(user)
                 .build();
         em.persist(seller);
 
@@ -74,7 +76,8 @@ class CustomQuestionRepositoryTest {
     @DisplayName("상품명으로 판매자의 문의 목록 조회 QueryDsl 실행 테스트")
     void testSearchQuestions() {
         // given
-        Integer sellerId = seller.getId();
+        Integer sellerId = user.getUserId();
+        System.out.println("ID: " + sellerId);
         OpinionSearchRequestDto searchCondition = OpinionSearchRequestDto.builder()
                 .searchType(SearchType.PRODUCT)
                 .keyword("상추")
@@ -100,7 +103,8 @@ class CustomQuestionRepositoryTest {
     @DisplayName("작성자명으로 판매자의 문의 목록 조회 QueryDsl 실행 테스트")
     void testSearchQuestionsByWriter() {
         // given
-        Integer sellerId = seller.getId();
+        Integer sellerId = user.getUserId();
+        System.out.println("ID: " + sellerId);
         OpinionSearchRequestDto searchCondition = OpinionSearchRequestDto.builder()
                 .searchType(SearchType.BUYER)
                 .keyword("user")
@@ -126,7 +130,8 @@ class CustomQuestionRepositoryTest {
     @DisplayName("SearchPeriod로 판매자의 문의 목록 조회 QueryDsl 실행 테스트")
     void testSearchQuestionsBySearchPeriod() {
         // given
-        Integer sellerId = seller.getId();
+        Integer sellerId = user.getUserId();
+        System.out.println("ID: " + sellerId);
         OpinionSearchRequestDto searchCondition = OpinionSearchRequestDto.builder()
                 .searchType(SearchType.BUYER)
                 .keyword("user")

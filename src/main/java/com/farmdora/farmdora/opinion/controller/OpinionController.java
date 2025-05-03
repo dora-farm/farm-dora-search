@@ -9,6 +9,7 @@ import com.farmdora.farmdora.opinion.dto.QuestionResponseDto;
 import com.farmdora.farmdora.opinion.dto.OpinionSearchRequestDto;
 import com.farmdora.farmdora.opinion.dto.ReviewResponseDto;
 import com.farmdora.farmdora.opinion.service.OpinionService;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -27,18 +28,21 @@ public class OpinionController {
     private final OpinionService opinionService;
 
     @GetMapping("/inquiry")
-    public ResponseEntity<?> searchQuestions(Integer sellerId,
+    public ResponseEntity<?> searchQuestions(Principal principal,
                                              OpinionSearchRequestDto searchCondition,
                                              @PageableDefault Pageable pageable) {
-        PageResponseDto<QuestionResponseDto> questions = opinionService.searchQuestions(sellerId, searchCondition, pageable);
+        String userId = principal.getName();
+        PageResponseDto<QuestionResponseDto> questions = opinionService.searchQuestions(Integer.parseInt(userId), searchCondition, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_QUESTION_SUCCESS.getMessage(), questions));
     }
 
     @GetMapping("/review")
-    public ResponseEntity<?> searchReviews(OpinionSearchRequestDto searchCondition,
+    public ResponseEntity<?> searchReviews(Principal principal,
+                                           OpinionSearchRequestDto searchCondition,
                                            @PageableDefault Pageable pageable) {
-        PageResponseDto<ReviewResponseDto> reviews = opinionService.searchReviews(searchCondition, pageable);
+        String userId = principal.getName();
+        PageResponseDto<ReviewResponseDto> reviews = opinionService.searchReviews(Integer.parseInt(userId), searchCondition, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_REVIEWS_SUCCESS.getMessage(), reviews));
     }

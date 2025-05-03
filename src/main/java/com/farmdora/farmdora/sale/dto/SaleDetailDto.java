@@ -21,6 +21,7 @@ public class SaleDetailDto {
 
     private List<OptionDetailDto> options;
 
+    private String title;
     private String origin;
     private boolean isLike;
     private String content;
@@ -35,8 +36,9 @@ public class SaleDetailDto {
 
         return SaleDetailDto.builder()
                 .files(images)
+                .title(sale.getTitle())
                 .origin(sale.getOrigin())
-                 .isLike(isLike)
+                .isLike(isLike)
                 .options(optionDetails)
                 .content(sale.getContent())
                 .build();

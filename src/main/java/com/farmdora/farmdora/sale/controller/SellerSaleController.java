@@ -6,8 +6,8 @@ import com.farmdora.farmdora.common.response.HttpResponse;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.sale.dto.SaleSearchRequestDto;
 import com.farmdora.farmdora.sale.dto.SaleSearchResponseDto;
-import com.farmdora.farmdora.sale.service.SaleService;
 import com.farmdora.farmdora.sale.service.SellerSaleService;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -27,21 +27,20 @@ public class SellerSaleController {
     private final SellerSaleService saleService;
 
     @PostMapping("/search")
-    public ResponseEntity<?> searchWithJson(@RequestBody SaleSearchRequestDto searchCondition) {
-        // TODO 스프링 시큐리티 구현 후 userId 가져오기
-        log.info("상품 목록 검색: {}", searchCondition);
+    public ResponseEntity<?> searchWithJson(Principal principal, @RequestBody SaleSearchRequestDto searchCondition) {
+        Integer userId = Integer.parseInt(principal.getName());
         Pageable pageable = searchCondition.toPageable();
-        PageResponseDto<SaleSearchResponseDto> result = saleService.searchSales(searchCondition.getSellerId(), searchCondition, pageable);
+        PageResponseDto<SaleSearchResponseDto> result = saleService.searchSales(userId, searchCondition, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_SALES_SUCCESS.getMessage(), result));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchWithParams() {
-        // TODO 스프링 시큐리티 구현 후 userId 가져오기
+    public ResponseEntity<?> searchWithParams(Principal principal) {
+        Integer userId = Integer.parseInt(principal.getName());
         SaleSearchRequestDto searchCondition = SaleSearchRequestDto.builder().build();
         Pageable pageable = searchCondition.toPageable();
-        PageResponseDto<SaleSearchResponseDto> result = saleService.searchSales(1, searchCondition, pageable);
+        PageResponseDto<SaleSearchResponseDto> result = saleService.searchSales(userId, searchCondition, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_SALES_SUCCESS.getMessage(), result));
     }

@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 public class CustomOrderRepositoryImpl implements CustomOrderRepository {
@@ -38,7 +39,7 @@ public class CustomOrderRepositoryImpl implements CustomOrderRepository {
     }
 
     @Override
-    public Page<OrderDto> searchOrders(Integer sellerId, OrderSearchRequestDto searchCondition, Pageable pageable) {
+    public Page<OrderDto> searchOrders(Integer userId, OrderSearchRequestDto searchCondition, Pageable pageable) {
         List<OrderDto> orders = queryFactory
                 .select(
                         new QOrderDto(order.id, user.name, orderStatus.name, orderOption.price.sum(), order.createdDate)
@@ -51,7 +52,7 @@ public class CustomOrderRepositoryImpl implements CustomOrderRepository {
                 .join(sale).on(option.sale.eq(sale))
                 .join(seller).on(sale.seller.eq(seller))
                 .where(
-                        seller.id.eq(sellerId),
+                        seller.user.userId.eq(userId),
                         keywordContains(searchCondition.getSearchType(), searchCondition.getKeyword()),
                         statusIn(searchCondition.getStatusIds()),
                         dateBetween(searchCondition.getStartDate(), searchCondition.getEndDate(), searchCondition.getSearchPeriod())
@@ -72,7 +73,7 @@ public class CustomOrderRepositoryImpl implements CustomOrderRepository {
                 .join(option).on(orderOption.option.eq(option))
                 .join(sale).on(option.sale.eq(sale))
                 .where(
-                        seller.id.eq(sellerId),
+                        seller.user.userId.eq(userId),
                         keywordContains(searchCondition.getSearchType(), searchCondition.getKeyword()),
                         statusIn(searchCondition.getStatusIds()),
                         dateBetween(searchCondition.getStartDate(), searchCondition.getEndDate(), searchCondition.getSearchPeriod())
@@ -85,7 +86,7 @@ public class CustomOrderRepositoryImpl implements CustomOrderRepository {
 
     @Override
     public List<OrderDetailDto> findOrderDetailsByIds(List<Integer> orderIds, Sort sort) {
-        List<OrderDetailDto> orderDetails = queryFactory
+        return queryFactory
                 .select(
                         new QOrderDetailDto(
                                 order.id,
@@ -102,9 +103,8 @@ public class CustomOrderRepositoryImpl implements CustomOrderRepository {
                 .join(sale).on(option.sale.eq(sale))
                 .where(order.id.in(orderIds))
                 .orderBy(ordersOrderBy(sort))
+                .groupBy(order.id, sale.id, sale.title, option.id, option.name, orderOption.quantity, orderOption.price)
                 .fetch();
-
-        return orderDetails;
     }
 
     private BooleanExpression statusIn(List<Short> statusIds) {
@@ -115,6 +115,10 @@ public class CustomOrderRepositoryImpl implements CustomOrderRepository {
     }
 
     private BooleanExpression keywordContains(SearchType searchType, String keyword) {
+        if (!StringUtils.hasText(keyword)) {
+            return null;
+        }
+
         if (searchType.equals(SearchType.PRODUCT)) {
             return sale.title.contains(keyword);
         } else if (searchType.equals(SearchType.BUYER)){

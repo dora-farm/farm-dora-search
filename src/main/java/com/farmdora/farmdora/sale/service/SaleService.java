@@ -4,6 +4,7 @@ import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.entity.Option;
 import com.farmdora.farmdora.entity.Review;
+import com.farmdora.farmdora.entity.ReviewFile;
 import com.farmdora.farmdora.entity.Sale;
 import com.farmdora.farmdora.entity.SaleFile;
 import com.farmdora.farmdora.opinion.repository.QuestionRepository;
@@ -18,11 +19,14 @@ import com.farmdora.farmdora.sale.dto.SaleSortType;
 import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
 import com.farmdora.farmdora.sale.repository.OptionRepository;
+import com.farmdora.farmdora.sale.repository.ReviewFileRepository;
 import com.farmdora.farmdora.sale.repository.SaleFileRepository;
 import com.farmdora.farmdora.sale.repository.SaleRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +48,7 @@ public class SaleService {
     private final ReviewRepository reviewRepository;
     private final QuestionRepository questionRepository;
     private final SaleRedisService saleRedisService;
+    private final ReviewFileRepository reviewFileRepository;
 
     @Value("${ncp.image.path}")
     private String imagePath;
@@ -56,7 +61,7 @@ public class SaleService {
         Sale sale = saleRepository.findById(saleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Sale", saleId));
         List<Option> options = optionRepository.findAllBySale(sale);
-        List<SaleFile> saleImages = saleFileRepository.findAllBySale(sale);
+        List<SaleFile> saleImages = addImagePath(saleFileRepository.findAllBySale(sale));
 
         if (userId == null) {
             return SaleDetailDto.createSaleDetail(sale, saleImages, options, false);
@@ -65,6 +70,18 @@ public class SaleService {
         boolean exists = likeRepository.existsByUserUserIdAndSaleId(userId, saleId);
 
         return SaleDetailDto.createSaleDetail(sale, saleImages, options, exists);
+    }
+
+    private List<SaleFile> addImagePath(List<SaleFile> saleImages) {
+        return saleImages.stream()
+                .map(file -> SaleFile.builder()
+                        .id(file.getId())
+                        .saveFile(String.format("%s%s%s", imagePath, file.getSaveFile(), type))
+                        .sale(file.getSale())
+                        .isMain(file.isMain())
+                        .originFile(file.getOriginFile())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -104,10 +121,32 @@ public class SaleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Sale", saleId));
 
         Page<Review> reviews = reviewRepository.findAllBySale(sale, pageable);
+
+        List<Integer> reviewIds = reviews.getContent()
+                .stream()
+                .map(Review::getId)
+                .toList();
+
+        List<ReviewFile> reviewFiles = reviewFileRepository.findByReviewIdIn(reviewIds);
+
+        Map<Integer, List<ReviewFile>> reviewFileMap = reviewFiles.stream()
+                .collect(Collectors.groupingBy(rf -> rf.getReview().getId()));
+
         List<ReviewDetailDto> reviewDetails = reviews.getContent()
                 .stream()
-                .map(ReviewDetailDto::fromEntity)
+                .map(r -> ReviewDetailDto.fromEntity(
+                        r,
+                        reviewFileMap.getOrDefault(r.getId(), List.of())
+                                .stream()
+                                .map(f -> ReviewFile.builder()
+                                        .id(f.getId())
+                                        .saveFile(String.format("%s%s%s", imagePath, f.getSaveFile(), type))
+                                        .review(f.getReview())
+                                        .build()
+                                ).collect(Collectors.toList())
+                ))
                 .toList();
+
         return new PageResponseDto<>(reviewDetails, reviews);
     }
 
@@ -142,6 +181,13 @@ public class SaleService {
     @Transactional(readOnly = true)
     public PageResponseDto<SaleSummaryDto> getSalesByCategory(Integer userId, Short bigTypeId, Short typeId, SaleSortType sortType, Pageable pageable) {
         Page<SaleSummaryDto> sales = saleRepository.searchSalesByCategories(userId, bigTypeId, typeId, sortType, pageable);
+
+        sales.getContent().forEach(s -> {
+            if (s.getMainImage() != null) {
+                s.setMainImage(imagePath + s.getMainImage() + type);
+            }
+        });
+
         return new PageResponseDto<>(sales.getContent(), sales);
     }
 }
