@@ -10,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.farmdora.farmdora.common.NcpImageProperties;
 import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.entity.Option;
@@ -38,6 +39,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -76,6 +78,9 @@ class SaleServiceTest {
 
     @Mock
     private SaleRedisService saleRedisService;
+
+    @Mock
+    private NcpImageProperties imageProperties;
 
     @InjectMocks
     private SaleService saleService;
@@ -331,8 +336,10 @@ class SaleServiceTest {
         Page<SaleRankingDto> saleRanks = new PageImpl<>(sales, pageable, 2);
         when(saleRepository.findTop50ByOrderCount(pageable)).thenReturn(saleRanks);
 
+        when(likeRepository.findSaleIdsByUserId(anyInt())).thenReturn(Set.of(1, 2, 3, 4));
+
         // when
-        PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(pageable);
+        PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(1, pageable);
 
         // then
         assertThat(result.getContents().size()).isEqualTo(2);
@@ -353,7 +360,7 @@ class SaleServiceTest {
 
         // when
         Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(pageable);
+        PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(1, pageable);
 
         // then
         verify(saleRepository, times(0)).findTop50ByOrderCount(pageable);

@@ -225,7 +225,7 @@ public class SaleControllerTest extends ControllerTest {
         sales.setCurrentPage(0);
         sales.setPageSize(10);
         sales.setTotalElements(100L);
-        when(saleService.getTop50Sales(any(Pageable.class))).thenReturn(sales);
+        when(saleService.getTop50Sales(anyInt(), any(Pageable.class))).thenReturn(sales);
 
         // when
         // then

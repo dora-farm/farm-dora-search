@@ -43,7 +43,7 @@ class SaleRedisServiceTest {
     void testCachePopularSales() {
         // given
         List<SaleRankingDto> dummyList = IntStream.rangeClosed(1, 50)
-                .mapToObj(i -> new SaleRankingDto(i, "상품" + i, i * 1000, null))
+                .mapToObj(i -> new SaleRankingDto(i, "상품" + i, i * 1000, null, "imageUrl"))
                 .toList();
         Page<SaleRankingDto> dummyPage = new PageImpl<>(dummyList);
 
