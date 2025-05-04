@@ -33,10 +33,13 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
         List<UserSearchResponseDto> users = queryFactory
                 .select(new QUserSearchResponseDto(
                         user.userId,
+                        user.id,
                         user.name,
                         user.isBlind,
-                        seller.id.isNotNull()
+                        seller.id.isNotNull(),
+                        user.createdDate
                 ))
+                .distinct()
                 .from(user)
                 .leftJoin(seller).on(seller.user.eq(user))
                 .where(
@@ -49,7 +52,7 @@ public class CustomUserRepositoryImpl implements CustomUserRepository {
                 .fetch();
 
         JPAQuery<Long> countQuery = queryFactory
-                .select(user.count())
+                .select(user.userId.countDistinct())
                 .from(user)
                 .leftJoin(seller).on(seller.user.eq(user))
                 .where(

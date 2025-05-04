@@ -32,16 +32,21 @@ class CustomUserRepositoryTest {
         // given
         for (int i = 1; i <= 15; i++) {
             User user = User.builder()
+                    .id("user" + i)
                     .name("user" + i)
                     .isBlind(false)
                     .build();
             em.persist(user);
 
             if (i % 2 == 0) {
-                Seller seller = Seller.builder()
+                Seller seller1 = Seller.builder()
                         .user(user)
                         .build();
-                em.persist(seller);
+                em.persist(seller1);
+                Seller seller2 = Seller.builder()
+                        .user(user)
+                        .build();
+                em.persist(seller2);
             }
         }
 
