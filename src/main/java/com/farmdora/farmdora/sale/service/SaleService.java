@@ -1,5 +1,6 @@
 package com.farmdora.farmdora.sale.service;
 
+import com.farmdora.farmdora.common.NcpImageProperties;
 import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.entity.Option;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +51,8 @@ public class SaleService {
     private final QuestionRepository questionRepository;
     private final SaleRedisService saleRedisService;
     private final ReviewFileRepository reviewFileRepository;
+
+    private final NcpImageProperties imageProperties;
 
     @Value("${ncp.image.path}")
     private String imagePath;
@@ -160,22 +164,45 @@ public class SaleService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto<SaleRankingDto> getTop50Sales(Pageable pageable) {
+    public PageResponseDto<SaleRankingDto> getTop50Sales(Integer userId, Pageable pageable) {
         List<SaleRankingDto> cachedSaleRanks = saleRedisService.findSaleRanks(pageable.getPageNumber());
         Integer count = saleRedisService.findSaleRankCount();
 
         if (cachedSaleRanks == null || cachedSaleRanks.isEmpty() || count == null) {
             log.info("캐시된 데이터가 존재하지 않습니다...DB를 조회합니다...");
-            return getTop50SalesFromDb(pageable);
+            return getTop50SalesFromDb(userId, pageable);
         }
 
-        Page<SaleRankingDto> sales = new PageImpl<>(cachedSaleRanks, pageable, count);
-        return new PageResponseDto<>(sales.getContent(), sales);
+        return toPageResponseWithLikeAndImage(cachedSaleRanks, count, userId, pageable);
     }
 
-    private PageResponseDto<SaleRankingDto> getTop50SalesFromDb(Pageable pageable) {
+    private PageResponseDto<SaleRankingDto> getTop50SalesFromDb(Integer userId, Pageable pageable) {
         Page<SaleRankingDto> sales = saleRepository.findTop50ByOrderCount(pageable);
-        return new PageResponseDto<>(sales.getContent(), sales);
+        List<SaleRankingDto> content = sales.getContent();
+
+        long totalElements = Math.min(50L, content.size());
+
+        return toPageResponseWithLikeAndImage(content, totalElements, userId, pageable);
+    }
+
+    private PageResponseDto<SaleRankingDto> toPageResponseWithLikeAndImage(
+            List<SaleRankingDto> dtos,
+            long totalElements,
+            Integer userId,
+            Pageable pageable) {
+
+        Set<Integer> likedSaleIds = Set.of();
+        if (userId != null) {
+            likedSaleIds = likeRepository.findSaleIdsByUserId(userId);
+        }
+
+        for (SaleRankingDto dto : dtos) {
+            dto.setLiked(userId != null && likedSaleIds.contains(dto.getSaleId()));
+            dto.setImageUrl(imageProperties.getPath() + dto.getImageUrl() + imageProperties.getType());
+        }
+
+        Page<SaleRankingDto> page = new PageImpl<>(dtos, pageable, totalElements);
+        return new PageResponseDto<>(dtos, page);
     }
 
     @Transactional(readOnly = true)
