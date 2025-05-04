@@ -71,8 +71,12 @@ public class SaleController {
     }
 
     @GetMapping("/rank")
-    public ResponseEntity<?> getSaleRank(@PageableDefault Pageable pageable) {
-        PageResponseDto<SaleRankingDto> sales = saleService.getTop50Sales(pageable);
+    public ResponseEntity<?> getSaleRank(Principal principal, @PageableDefault Pageable pageable) {
+        Integer userId = null;
+        if (principal != null) {
+            userId = Integer.parseInt(principal.getName());
+        }
+        PageResponseDto<SaleRankingDto> sales = saleService.getTop50Sales(userId, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_SALES_RANK.getMessage(), sales));
     }
