@@ -12,4 +12,8 @@ import org.springframework.stereotype.Component;
 public class NcpImageProperties {
     private String path;
     private String type;
+
+    public String createImageUrl(String imageUrl) {
+        return String.format("%s%s%s", path, imageUrl, type);
+    }
 }
