@@ -4,7 +4,6 @@ import static com.farmdora.farmdora.entity.QQuestion.question;
 import static com.farmdora.farmdora.entity.QSale.sale;
 import static com.farmdora.farmdora.entity.QSeller.seller;
 
-import com.farmdora.farmdora.entity.QUser;
 import com.farmdora.farmdora.order.dto.SearchPeriod;
 import com.farmdora.farmdora.order.dto.SearchType;
 import com.farmdora.farmdora.order.dto.Sort;
@@ -47,6 +46,8 @@ public class CustomQuestionRepositoryImpl implements CustomQuestionRepository {
                         question.isProcess
                 ))
                 .from(question)
+                .join(question.sale, sale)
+                .join(sale.seller, seller)
                 .where(
                         sale.seller.user.userId.eq(userId),
                         keywordContains(searchCondition.getSearchType(), searchCondition.getKeyword()),
@@ -60,18 +61,14 @@ public class CustomQuestionRepositoryImpl implements CustomQuestionRepository {
                 .fetch();
 
         log.info("문의 목록: {}", questions);
-        QUser sellerUser = new QUser("sellerUser");
-        QUser buyer = new QUser("buyer");
 
         JPAQuery<Long> countQuery = queryFactory
                 .select(question.count())
                 .from(question)
                 .join(question.sale, sale)
-                .join(question.user, sellerUser)
                 .join(sale.seller, seller)
-                .join(seller.user, buyer)
                 .where(
-                        sellerUser.userId.eq(userId),
+                        seller.user.userId.eq(userId),
                         keywordContains(searchCondition.getSearchType(), searchCondition.getKeyword()),
                         dateBetween(searchCondition.getStartDate(), searchCondition.getEndDate(),
                                 searchCondition.getSearchPeriod()),
