@@ -22,6 +22,7 @@ import com.farmdora.farmdora.entity.SaleType;
 import com.farmdora.farmdora.entity.User;
 import com.farmdora.farmdora.opinion.repository.QuestionRepository;
 import com.farmdora.farmdora.opinion.repository.ReviewRepository;
+import com.farmdora.farmdora.sale.dto.CategorySearchRequestDto;
 import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
@@ -387,12 +388,16 @@ class SaleServiceTest {
         );
         Pageable pageable = PageRequest.of(0, 10);
         PageImpl<SaleSummaryDto> sales = new PageImpl<>(saleSummaries, pageable, 2);
-        when(saleRepository.searchSalesByCategories(anyInt(), anyShort(), anyShort(), any(SaleSortType.class), any(Pageable.class))).thenReturn(sales);
+        when(saleRepository.searchSalesByCategories(anyInt(), any(CategorySearchRequestDto.class), any(Pageable.class))).thenReturn(sales);
 
         // when
-        Short bigTypeId = 1;
-        Short typeId = 2;
-        PageResponseDto<SaleSummaryDto> result = saleService.getSalesByCategory(1, bigTypeId, typeId, SaleSortType.PRICE_DESC, pageable);
+        CategorySearchRequestDto searchCondition = CategorySearchRequestDto.builder()
+                .keyword(null)
+                .typeId(Short.valueOf("1"))
+                .bigTypeId(Short.valueOf("2"))
+                .sort(SaleSortType.PRICE_DESC)
+                .build();
+        PageResponseDto<SaleSummaryDto> result = saleService.getSalesByCategory(1, searchCondition, pageable);
 
         // then
         assertThat(result.getContents().size()).isEqualTo(2);

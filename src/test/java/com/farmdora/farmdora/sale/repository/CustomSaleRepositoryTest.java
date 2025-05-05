@@ -12,6 +12,7 @@ import com.farmdora.farmdora.entity.SaleFile;
 import com.farmdora.farmdora.entity.SaleType;
 import com.farmdora.farmdora.entity.SaleTypeBig;
 import com.farmdora.farmdora.entity.User;
+import com.farmdora.farmdora.sale.dto.CategorySearchRequestDto;
 import com.farmdora.farmdora.sale.dto.SaleSortType;
 import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import org.junit.jupiter.api.DisplayName;
@@ -101,7 +102,6 @@ class CustomSaleRepositoryTest {
                     .build();
             em.persist(orderOption1);
 
-            // 짝수번이 주문수가 가장 많음
             if (i % 2 == 0) {
                 OrderOption orderOption2 = OrderOption.builder()
                         .order(order2)
@@ -110,7 +110,6 @@ class CustomSaleRepositoryTest {
                 em.persist(orderOption2);
             }
 
-            // 짝수번이 좋아요수가 가장 많음
             if (i % 2 == 0) {
                 em.persist(Like.builder()
                         .sale(sale)
@@ -124,10 +123,37 @@ class CustomSaleRepositoryTest {
 
         // when
         Pageable pageable = PageRequest.of(0, 10);
-        Page<SaleSummaryDto> salesByType = saleRepository.searchSalesByCategories(user1.getUserId(), bigType.getId(), type.getId(), SaleSortType.PRICE_DESC, pageable);
-        Page<SaleSummaryDto> salesByBigType = saleRepository.searchSalesByCategories(user1.getUserId(), bigType.getId(), null, SaleSortType.ORDER_DESC, pageable);
-        Page<SaleSummaryDto> salesByNoType = saleRepository.searchSalesByCategories(user1.getUserId(),null, null, SaleSortType.REVIEW_DESC, pageable);
-        Page<SaleSummaryDto> salesByLikeCount = saleRepository.searchSalesByCategories(user1.getUserId(),null, null, SaleSortType.RECOMMEND, pageable);
+        CategorySearchRequestDto searchCondition1 = CategorySearchRequestDto.builder()
+                .keyword(null)
+                .typeId(type.getId())
+                .bigTypeId(bigType.getId())
+                .sort(SaleSortType.PRICE_DESC)
+                .build();
+        Page<SaleSummaryDto> salesByType = saleRepository.searchSalesByCategories(user1.getUserId(), searchCondition1, pageable);
+
+        CategorySearchRequestDto searchCondition2 = CategorySearchRequestDto.builder()
+                .keyword(null)
+                .typeId(null)
+                .bigTypeId(bigType.getId())
+                .sort(SaleSortType.ORDER_DESC)
+                .build();
+        Page<SaleSummaryDto> salesByBigType = saleRepository.searchSalesByCategories(user1.getUserId(), searchCondition2, pageable);
+
+        CategorySearchRequestDto searchCondition3 = CategorySearchRequestDto.builder()
+                .keyword(null)
+                .typeId(null)
+                .bigTypeId(null)
+                .sort(SaleSortType.REVIEW_DESC)
+                .build();
+        Page<SaleSummaryDto> salesByNoType = saleRepository.searchSalesByCategories(user1.getUserId(), searchCondition3, pageable);
+
+        CategorySearchRequestDto searchCondition4 = CategorySearchRequestDto.builder()
+                .keyword(null)
+                .typeId(null)
+                .bigTypeId(null)
+                .sort(SaleSortType.RECOMMEND)
+                .build();
+        Page<SaleSummaryDto> salesByLikeCount = saleRepository.searchSalesByCategories(user1.getUserId(), searchCondition4, pageable);
 
         // then
         assertThat(salesByType.getContent().size()).isEqualTo(10);

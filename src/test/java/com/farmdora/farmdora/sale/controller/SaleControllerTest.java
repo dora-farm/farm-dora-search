@@ -9,7 +9,6 @@ import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_REVIEW
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyShort;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -18,13 +17,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.farmdora.farmdora.ControllerTest;
 import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdora.common.response.PageResponseDto;
+import com.farmdora.farmdora.sale.dto.CategorySearchRequestDto;
 import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto.OptionDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
-import com.farmdora.farmdora.sale.dto.SaleSortType;
 import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -251,7 +250,7 @@ public class SaleControllerTest extends ControllerTest {
         sales.setCurrentPage(0);
         sales.setPageSize(10);
         sales.setTotalElements(100L);
-        when(saleService.getSalesByCategory(anyInt(), anyShort(), anyShort(), any(SaleSortType.class), any(Pageable.class))).thenReturn(sales);
+        when(saleService.getSalesByCategory(anyInt(), any(CategorySearchRequestDto.class), any(Pageable.class))).thenReturn(sales);
 
         // when
         // then
