@@ -9,12 +9,12 @@ import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_REVIEW
 
 import com.farmdora.farmdora.common.response.HttpResponse;
 import com.farmdora.farmdora.common.response.PageResponseDto;
+import com.farmdora.farmdora.sale.dto.CategorySearchRequestDto;
 import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
-import com.farmdora.farmdora.sale.dto.SaleSortType;
 import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import com.farmdora.farmdora.sale.service.SaleService;
 import java.security.Principal;
@@ -27,7 +27,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -38,7 +37,10 @@ public class SaleController {
 
     @GetMapping("/{saleId}")
     public ResponseEntity<?> getSaleDetail(Principal principal, @PathVariable("saleId") Integer saleId) {
-        Integer userId = Integer.parseInt(principal.getName());
+        Integer userId = null;
+        if (principal != null) {
+            userId = Integer.parseInt(principal.getName());
+        }
         SaleDetailDto saleDetail = saleService.getSaleDetail(userId, saleId);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_SALE_DETAIL_SUCCESS.getMessage(), saleDetail));
@@ -71,20 +73,25 @@ public class SaleController {
     }
 
     @GetMapping("/rank")
-    public ResponseEntity<?> getSaleRank(@PageableDefault Pageable pageable) {
-        PageResponseDto<SaleRankingDto> sales = saleService.getTop50Sales(pageable);
+    public ResponseEntity<?> getSaleRank(Principal principal, @PageableDefault Pageable pageable) {
+        Integer userId = null;
+        if (principal != null) {
+            userId = Integer.parseInt(principal.getName());
+        }
+        PageResponseDto<SaleRankingDto> sales = saleService.getTop50Sales(userId, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_SALES_RANK.getMessage(), sales));
     }
 
     @GetMapping("/type")
     public ResponseEntity<?> getSalesByType(Principal principal,
-                                            @RequestParam(required = false) Short bigTypeId,
-                                            @RequestParam(required = false) Short typeId,
-                                            @RequestParam(required = false) SaleSortType sort,
+                                            CategorySearchRequestDto searchCondition,
                                             @PageableDefault(size = 20) Pageable pageable) {
-        Integer userId = Integer.parseInt(principal.getName());
-        PageResponseDto<SaleSummaryDto> sales = saleService.getSalesByCategory(userId, bigTypeId, typeId, sort, pageable);
+        Integer userId = null;
+        if (principal != null) {
+            userId = Integer.parseInt(principal.getName());
+        }
+        PageResponseDto<SaleSummaryDto> sales = saleService.getSalesByCategory(userId, searchCondition, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_SALES_BY_CATEGORIES.getMessage(), sales));
     }

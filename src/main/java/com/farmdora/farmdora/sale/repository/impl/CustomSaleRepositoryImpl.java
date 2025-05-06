@@ -7,12 +7,14 @@ import static com.farmdora.farmdora.entity.QReview.review;
 import static com.farmdora.farmdora.entity.QSale.sale;
 import static com.farmdora.farmdora.entity.QSaleFile.saleFile;
 
+import com.farmdora.farmdora.sale.dto.CategorySearchRequestDto;
 import com.farmdora.farmdora.sale.dto.QSaleSummaryDto;
 import com.farmdora.farmdora.sale.dto.SaleSortType;
 import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import com.farmdora.farmdora.sale.repository.CustomSaleRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,6 +23,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.util.StringUtils;
 
 public class CustomSaleRepositoryImpl implements CustomSaleRepository {
 
@@ -31,29 +34,34 @@ public class CustomSaleRepositoryImpl implements CustomSaleRepository {
     }
 
     @Override
-    public Page<SaleSummaryDto> searchSalesByCategories(Integer userId, Short bigTypeId, Short typeId,
-                                                        SaleSortType sortType, Pageable pageable) {
+    public Page<SaleSummaryDto> searchSalesByCategories(Integer userId, CategorySearchRequestDto searchCondition, Pageable pageable) {
         List<SaleSummaryDto> sales = queryFactory
                 .select(new QSaleSummaryDto(
                         sale.id,
                         sale.title,
                         option.price.min(),
-                        JPAExpressions
-                                .selectOne()
-                                .from(like)
-                                .where(like.sale.eq(sale)
-                                        .and(like.user.userId.eq(userId)))
-                                .exists(),
-                        saleFile.saveFile.max()))
+                        userId != null ?
+                                JPAExpressions
+                                        .selectOne()
+                                        .from(like)
+                                        .where(like.sale.eq(sale)
+                                                .and(like.user.userId.eq(userId)))
+                                        .exists() :
+                                Expressions.FALSE,
+                        saleFile.saveFile.max()
+                ))
                 .from(sale)
                 .leftJoin(option).on(option.sale.eq(sale))
                 .leftJoin(orderOption).on(orderOption.option.eq(option))
                 .leftJoin(review).on(review.sale.eq(sale))
                 .leftJoin(saleFile).on(saleFile.sale.eq(sale).and(saleFile.isMain.isTrue()))
                 .leftJoin(like).on(like.sale.eq(sale))
-                .where(categoryCondition(typeId, bigTypeId))
+                .where(
+                        keywordContains(searchCondition.getKeyword()),
+                        categoryCondition(searchCondition.getTypeId(), searchCondition.getBigTypeId())
+                )
                 .groupBy(sale.id, sale.title)
-                .orderBy(getSaleOrderSpecifier(sortType), sale.id.desc())
+                .orderBy(getSaleOrderSpecifier(searchCondition.getSort()), sale.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -61,9 +69,16 @@ public class CustomSaleRepositoryImpl implements CustomSaleRepository {
         JPAQuery<Long> countQuery = queryFactory
                 .select(sale.count())
                 .from(sale)
-                .where(categoryCondition(typeId, bigTypeId));
+                .where(categoryCondition(searchCondition.getTypeId(), searchCondition.getBigTypeId()));
 
         return PageableExecutionUtils.getPage(sales, pageable, countQuery::fetchOne);
+    }
+
+    private BooleanExpression keywordContains(String keyword) {
+        if (StringUtils.hasText(keyword)) {
+            return sale.title.contains(keyword);
+        }
+        return null;
     }
 
     private BooleanExpression categoryCondition(Short typeId, Short bigTypeId) {
@@ -79,6 +94,10 @@ public class CustomSaleRepositoryImpl implements CustomSaleRepository {
     }
 
     private OrderSpecifier<?> getSaleOrderSpecifier(SaleSortType sort) {
+        if (sort == null) {
+            return sale.id.desc();
+        }
+
         return switch (sort) {
             case ORDER_DESC -> orderOption.id.count().desc();
             case ORDER_ASC -> orderOption.id.count().asc();

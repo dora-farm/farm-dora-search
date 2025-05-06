@@ -1,5 +1,6 @@
 package com.farmdora.farmdora.sale.service;
 
+import com.farmdora.farmdora.common.NcpImageProperties;
 import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.entity.Option;
@@ -9,13 +10,13 @@ import com.farmdora.farmdora.entity.Sale;
 import com.farmdora.farmdora.entity.SaleFile;
 import com.farmdora.farmdora.opinion.repository.QuestionRepository;
 import com.farmdora.farmdora.opinion.repository.ReviewRepository;
+import com.farmdora.farmdora.sale.dto.CategorySearchRequestDto;
 import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleRankingDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedDto;
 import com.farmdora.farmdora.sale.dto.SaleRelatedInfoDto;
-import com.farmdora.farmdora.sale.dto.SaleSortType;
 import com.farmdora.farmdora.sale.dto.SaleSummaryDto;
 import com.farmdora.farmdora.sale.repository.LikeRepository;
 import com.farmdora.farmdora.sale.repository.OptionRepository;
@@ -26,10 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -49,12 +50,7 @@ public class SaleService {
     private final QuestionRepository questionRepository;
     private final SaleRedisService saleRedisService;
     private final ReviewFileRepository reviewFileRepository;
-
-    @Value("${ncp.image.path}")
-    private String imagePath;
-
-    @Value("${ncp.image.type}")
-    private String type;
+    private final NcpImageProperties imageProperties;
 
     @Transactional(readOnly = true)
     public SaleDetailDto getSaleDetail(Integer userId, Integer saleId) {
@@ -76,7 +72,7 @@ public class SaleService {
         return saleImages.stream()
                 .map(file -> SaleFile.builder()
                         .id(file.getId())
-                        .saveFile(String.format("%s%s%s", imagePath, file.getSaveFile(), type))
+                        .saveFile(imageProperties.createImageUrl(file.getSaveFile()))
                         .sale(file.getSale())
                         .isMain(file.isMain())
                         .originFile(file.getOriginFile())
@@ -110,7 +106,7 @@ public class SaleService {
     private String getMainImage(Optional<SaleFile> saleFile) {
         String mainImage = null;
         if (saleFile.isPresent()) {
-            mainImage = String.format("%s%s%s", imagePath, saleFile.get().getSaveFile(), type);
+            mainImage = imageProperties.createImageUrl(saleFile.get().getSaveFile());
         }
         return mainImage;
     }
@@ -140,7 +136,7 @@ public class SaleService {
                                 .stream()
                                 .map(f -> ReviewFile.builder()
                                         .id(f.getId())
-                                        .saveFile(String.format("%s%s%s", imagePath, f.getSaveFile(), type))
+                                        .saveFile(imageProperties.createImageUrl(f.getSaveFile()))
                                         .review(f.getReview())
                                         .build()
                                 ).collect(Collectors.toList())
@@ -160,31 +156,56 @@ public class SaleService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto<SaleRankingDto> getTop50Sales(Pageable pageable) {
+    public PageResponseDto<SaleRankingDto> getTop50Sales(Integer userId, Pageable pageable) {
         List<SaleRankingDto> cachedSaleRanks = saleRedisService.findSaleRanks(pageable.getPageNumber());
         Integer count = saleRedisService.findSaleRankCount();
 
         if (cachedSaleRanks == null || cachedSaleRanks.isEmpty() || count == null) {
             log.info("캐시된 데이터가 존재하지 않습니다...DB를 조회합니다...");
-            return getTop50SalesFromDb(pageable);
+            return getTop50SalesFromDb(userId, pageable);
         }
 
-        Page<SaleRankingDto> sales = new PageImpl<>(cachedSaleRanks, pageable, count);
-        return new PageResponseDto<>(sales.getContent(), sales);
+        return toPageResponseWithLikeAndImage(cachedSaleRanks, count, userId, pageable);
     }
 
-    private PageResponseDto<SaleRankingDto> getTop50SalesFromDb(Pageable pageable) {
+    private PageResponseDto<SaleRankingDto> getTop50SalesFromDb(Integer userId, Pageable pageable) {
         Page<SaleRankingDto> sales = saleRepository.findTop50ByOrderCount(pageable);
-        return new PageResponseDto<>(sales.getContent(), sales);
+        List<SaleRankingDto> content = sales.getContent();
+
+        long totalElements = Math.min(50L, content.size());
+
+        return toPageResponseWithLikeAndImage(content, totalElements, userId, pageable);
+    }
+
+    private PageResponseDto<SaleRankingDto> toPageResponseWithLikeAndImage(
+            List<SaleRankingDto> dtos,
+            long totalElements,
+            Integer userId,
+            Pageable pageable) {
+
+        Set<Integer> likedSaleIds = Set.of();
+        if (userId != null) {
+            likedSaleIds = likeRepository.findSaleIdsByUserId(userId);
+        }
+
+        for (SaleRankingDto sale : dtos) {
+            sale.setLiked(userId != null && likedSaleIds.contains(sale.getSaleId()));
+            sale.setImageUrl(imageProperties.createImageUrl(sale.getImageUrl()));
+        }
+
+        Page<SaleRankingDto> page = new PageImpl<>(dtos, pageable, totalElements);
+        return new PageResponseDto<>(dtos, page);
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto<SaleSummaryDto> getSalesByCategory(Integer userId, Short bigTypeId, Short typeId, SaleSortType sortType, Pageable pageable) {
-        Page<SaleSummaryDto> sales = saleRepository.searchSalesByCategories(userId, bigTypeId, typeId, sortType, pageable);
+    public PageResponseDto<SaleSummaryDto> getSalesByCategory(Integer userId,
+                                                              CategorySearchRequestDto searchCondition,
+                                                              Pageable pageable) {
+        Page<SaleSummaryDto> sales = saleRepository.searchSalesByCategories(userId, searchCondition, pageable);
 
         sales.getContent().forEach(s -> {
             if (s.getMainImage() != null) {
-                s.setMainImage(imagePath + s.getMainImage() + type);
+                s.setMainImage(imageProperties.createImageUrl(s.getMainImage()));
             }
         });
 

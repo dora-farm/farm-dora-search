@@ -31,11 +31,13 @@ public interface SaleRepository extends JpaRepository<Sale, Integer>, CustomSell
             "s.id, " +
             "s.title, " +
             "MIN(o.price), " +
-            "COUNT(oo.id)) " +
+            "COUNT(oo.id), " +
+            "sf.saveFile) " +
             "FROM Sale s " +
             "JOIN Option o ON o.sale = s " +
             "JOIN OrderOption oo ON oo.option = o " +
-            "GROUP BY s.id, s.title " +
+            "LEFT JOIN SaleFile sf ON sf.sale = s AND sf.isMain = true " +
+            "GROUP BY s.id, s.title, sf.saveFile " +
             "ORDER BY COUNT(oo.id) DESC, s.id DESC")
     Page<SaleRankingDto> findTop50ByOrderCount(Pageable pageable);
 }

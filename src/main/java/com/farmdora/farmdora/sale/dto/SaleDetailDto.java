@@ -54,12 +54,14 @@ public class SaleDetailDto {
         private Integer optionId;
         private String optionName;
         private Integer price;
+        private Integer stock;
 
         public static OptionDetailDto createOptionDetail(Option option) {
             return OptionDetailDto.builder()
                     .optionId(option.getId())
                     .optionName(option.getName())
                     .price(option.getPrice())
+                    .stock(option.getQuantity())
                     .build();
         }
     }

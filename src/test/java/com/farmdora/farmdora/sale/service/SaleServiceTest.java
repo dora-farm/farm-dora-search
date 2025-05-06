@@ -10,6 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.farmdora.farmdora.common.NcpImageProperties;
 import com.farmdora.farmdora.common.exception.ResourceNotFoundException;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.entity.Option;
@@ -21,6 +22,7 @@ import com.farmdora.farmdora.entity.SaleType;
 import com.farmdora.farmdora.entity.User;
 import com.farmdora.farmdora.opinion.repository.QuestionRepository;
 import com.farmdora.farmdora.opinion.repository.ReviewRepository;
+import com.farmdora.farmdora.sale.dto.CategorySearchRequestDto;
 import com.farmdora.farmdora.sale.dto.QuestionResponseDto;
 import com.farmdora.farmdora.sale.dto.ReviewDetailDto;
 import com.farmdora.farmdora.sale.dto.SaleDetailDto;
@@ -38,6 +40,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -76,6 +79,9 @@ class SaleServiceTest {
 
     @Mock
     private SaleRedisService saleRedisService;
+
+    @Mock
+    private NcpImageProperties imageProperties;
 
     @InjectMocks
     private SaleService saleService;
@@ -331,8 +337,10 @@ class SaleServiceTest {
         Page<SaleRankingDto> saleRanks = new PageImpl<>(sales, pageable, 2);
         when(saleRepository.findTop50ByOrderCount(pageable)).thenReturn(saleRanks);
 
+        when(likeRepository.findSaleIdsByUserId(anyInt())).thenReturn(Set.of(1, 2, 3, 4));
+
         // when
-        PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(pageable);
+        PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(1, pageable);
 
         // then
         assertThat(result.getContents().size()).isEqualTo(2);
@@ -353,7 +361,7 @@ class SaleServiceTest {
 
         // when
         Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(pageable);
+        PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(1, pageable);
 
         // then
         verify(saleRepository, times(0)).findTop50ByOrderCount(pageable);
@@ -380,12 +388,16 @@ class SaleServiceTest {
         );
         Pageable pageable = PageRequest.of(0, 10);
         PageImpl<SaleSummaryDto> sales = new PageImpl<>(saleSummaries, pageable, 2);
-        when(saleRepository.searchSalesByCategories(anyInt(), anyShort(), anyShort(), any(SaleSortType.class), any(Pageable.class))).thenReturn(sales);
+        when(saleRepository.searchSalesByCategories(anyInt(), any(CategorySearchRequestDto.class), any(Pageable.class))).thenReturn(sales);
 
         // when
-        Short bigTypeId = 1;
-        Short typeId = 2;
-        PageResponseDto<SaleSummaryDto> result = saleService.getSalesByCategory(1, bigTypeId, typeId, SaleSortType.PRICE_DESC, pageable);
+        CategorySearchRequestDto searchCondition = CategorySearchRequestDto.builder()
+                .keyword(null)
+                .typeId(Short.valueOf("1"))
+                .bigTypeId(Short.valueOf("2"))
+                .sort(SaleSortType.PRICE_DESC)
+                .build();
+        PageResponseDto<SaleSummaryDto> result = saleService.getSalesByCategory(1, searchCondition, pageable);
 
         // then
         assertThat(result.getContents().size()).isEqualTo(2);
