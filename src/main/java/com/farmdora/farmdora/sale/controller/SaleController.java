@@ -20,6 +20,7 @@ import com.farmdora.farmdora.sale.service.SaleService;
 import java.security.Principal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/sale")
 @RequiredArgsConstructor
@@ -50,7 +52,11 @@ public class SaleController {
     public ResponseEntity<?> getRelatedSales(Principal principal,
                                              @PathVariable("saleId") Integer saleId,
                                              @PageableDefault Pageable pageable) {
-        Integer userId = Integer.parseInt(principal.getName());
+        Integer userId = null;
+        if (principal != null) {
+            userId = Integer.parseInt(principal.getName());
+        }
+        log.info("관련 상품 목록 조회: {}", userId);
         List<SaleRelatedDto> relatedSales = saleService.getRelatedSales(userId, saleId, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_RELATED_SALES_SUCCESS.getMessage(), relatedSales));
