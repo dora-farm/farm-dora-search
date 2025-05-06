@@ -5,4 +5,7 @@ spring:
     username: ENC(DHRmOlZ8bg4K57q2F3j4oFrGjrudIQu3)
     password: ENC(wcEiMtZdcspXjQt3JXr6kus48hFneUJZ)
 
-  # redis
+  data:
+    redis:
+      host: ENC(VFdUc/6tLyxg23xcLaVduyy/WRypzmZy)
+      port: 6379
