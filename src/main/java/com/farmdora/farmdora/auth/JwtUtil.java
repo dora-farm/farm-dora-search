@@ -1,5 +1,8 @@
 package com.farmdora.farmdora.auth;
 
+import static com.farmdora.farmdora.auth.JwtConstants.EXTRACT_ROLE;
+import static com.farmdora.farmdora.auth.JwtConstants.USERNAME;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -33,7 +36,7 @@ public class JwtUtil {
                 .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token)
-                .getPayload().get("userId", Integer.class);
+                .getPayload().get(USERNAME, Integer.class);
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities(String token) {
@@ -42,7 +45,7 @@ public class JwtUtil {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
-                .get("role", String.class);
+                .get(EXTRACT_ROLE, String.class);
         return List.of(new SimpleGrantedAuthority(role));
     }
 
@@ -51,7 +54,8 @@ public class JwtUtil {
             Claims claims = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
-                    .parseSignedClaims(token).getPayload();
+                    .parseSignedClaims(token)
+                    .getPayload();
             return !claims.getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             log.error("Jwt 요효성 검사 실패");
