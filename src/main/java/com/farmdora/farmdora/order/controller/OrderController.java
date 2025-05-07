@@ -2,6 +2,7 @@ package com.farmdora.farmdora.order.controller;
 
 import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_ORDER_SUCCESS;
 
+import com.farmdora.farmdora.auth.PrincipalUtil;
 import com.farmdora.farmdora.common.response.HttpResponse;
 import com.farmdora.farmdora.order.dto.OrderSearchRequestDto;
 import com.farmdora.farmdora.order.dto.OrderSearchResponseDto;
@@ -21,15 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/my/seller/order")
 @RequiredArgsConstructor
 public class OrderController {
-
     private final OrderService orderService;
+    private final PrincipalUtil principalUtil;
 
     @GetMapping("/search")
     public ResponseEntity<?> searchOrders(Principal principal,
                                           OrderSearchRequestDto searchCondition,
                                           @PageableDefault Pageable pageable) {
-        String userId = principal.getName();
-        PageResponseDto<OrderSearchResponseDto> orders = orderService.searchOrders(Integer.parseInt(userId), searchCondition, pageable);
+        Integer userId = principalUtil.extractUserIdRequired(principal);
+        PageResponseDto<OrderSearchResponseDto> orders = orderService.searchOrders(userId, searchCondition, pageable);
         return ResponseEntity
                 .ok()
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_ORDER_SUCCESS.getMessage(), orders));
