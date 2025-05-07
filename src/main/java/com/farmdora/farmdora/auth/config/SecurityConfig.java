@@ -60,8 +60,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
+                "http://farm-dora.kro.kr",
                 "http://www.farm-dora.kro.kr",
-                "http://farm-dora.kro.kr"
+                "https://farm-dora.kro.kr"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
