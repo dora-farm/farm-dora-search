@@ -7,6 +7,7 @@ import static com.farmdora.farmdora.common.response.SuccessMessage.GET_SALE_DETA
 import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_QUESTION_SUCCESS;
 import static com.farmdora.farmdora.common.response.SuccessMessage.SEARCH_REVIEWS_SUCCESS;
 
+import com.farmdora.farmdora.auth.PrincipalUtil;
 import com.farmdora.farmdora.common.response.HttpResponse;
 import com.farmdora.farmdora.common.response.PageResponseDto;
 import com.farmdora.farmdora.sale.dto.CategorySearchRequestDto;
@@ -34,13 +35,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class SaleController {
     private final SaleService saleService;
+    private final PrincipalUtil principalUtil;
 
     @GetMapping("/{saleId}")
     public ResponseEntity<?> getSaleDetail(Principal principal, @PathVariable("saleId") Integer saleId) {
-        Integer userId = null;
-        if (principal != null) {
-            userId = Integer.parseInt(principal.getName());
-        }
+        Integer userId = principalUtil.extractUserIdRequired(principal);
         SaleDetailDto saleDetail = saleService.getSaleDetail(userId, saleId);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_SALE_DETAIL_SUCCESS.getMessage(), saleDetail));
@@ -50,7 +49,7 @@ public class SaleController {
     public ResponseEntity<?> getRelatedSales(Principal principal,
                                              @PathVariable("saleId") Integer saleId,
                                              @PageableDefault Pageable pageable) {
-        Integer userId = Integer.parseInt(principal.getName());
+        Integer userId = principalUtil.extractUserIdRequired(principal);
         List<SaleRelatedDto> relatedSales = saleService.getRelatedSales(userId, saleId, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_RELATED_SALES_SUCCESS.getMessage(), relatedSales));
@@ -74,10 +73,7 @@ public class SaleController {
 
     @GetMapping("/rank")
     public ResponseEntity<?> getSaleRank(Principal principal, @PageableDefault Pageable pageable) {
-        Integer userId = null;
-        if (principal != null) {
-            userId = Integer.parseInt(principal.getName());
-        }
+        Integer userId = principalUtil.extractUserIdRequired(principal);
         PageResponseDto<SaleRankingDto> sales = saleService.getTop50Sales(userId, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_SALES_RANK.getMessage(), sales));
@@ -87,10 +83,7 @@ public class SaleController {
     public ResponseEntity<?> getSalesByType(Principal principal,
                                             CategorySearchRequestDto searchCondition,
                                             @PageableDefault(size = 20) Pageable pageable) {
-        Integer userId = null;
-        if (principal != null) {
-            userId = Integer.parseInt(principal.getName());
-        }
+        Integer userId = principalUtil.extractUserIdRequired(principal);
         PageResponseDto<SaleSummaryDto> sales = saleService.getSalesByCategory(userId, searchCondition, pageable);
         return ResponseEntity.ok()
                 .body(new HttpResponse(HttpStatus.OK, GET_SALES_BY_CATEGORIES.getMessage(), sales));

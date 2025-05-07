@@ -4,6 +4,7 @@ import com.farmdora.farmdora.admin.controller.PopupController;
 import com.farmdora.farmdora.admin.controller.UserController;
 import com.farmdora.farmdora.admin.service.PopupService;
 import com.farmdora.farmdora.admin.service.UserService;
+import com.farmdora.farmdora.auth.PrincipalUtil;
 import com.farmdora.farmdora.order.controller.OrderController;
 import com.farmdora.farmdora.order.service.OrderService;
 import com.farmdora.farmdora.opinion.controller.OpinionController;
@@ -35,6 +36,9 @@ public abstract class ControllerTest {
 
     @Autowired
     protected MockMvc mvc;
+
+    @MockitoBean
+    protected PrincipalUtil principalUtil;
 
     @MockitoBean
     protected OrderService orderService;

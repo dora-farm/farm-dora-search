@@ -56,7 +56,9 @@ public class SaleRedisService {
         log.info("인기 상품 목록을 캐시에서 조회합니다.");
 
         Object cachedSalesValue = redisTemplate.opsForValue().get(POPULAR_SALES_KEY + page);
-        if (cachedSalesValue == null) return null;
+        if (cachedSalesValue == null) {
+            return null;
+        }
 
         List<?> cachedSales = (List<?>) cachedSalesValue;
         return cachedSales.stream()
