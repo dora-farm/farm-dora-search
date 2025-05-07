@@ -19,12 +19,7 @@ public class PopupSearchResponseDto {
     private LocalDate endDate;
     private String type;
 
-    public static PopupSearchResponseDto fromEntity(Popup popup, String imagePath, String imageType) {
-        String imageUrl = null;
-        if (popup.getSaveFile() != null) {
-            imageUrl = imagePath + popup.getSaveFile() + imageType;
-        }
-
+    public static PopupSearchResponseDto fromEntity(Popup popup, String imageUrl) {
         return PopupSearchResponseDto.builder()
                 .popupId(popup.getId())
                 .title(popup.getTitle())

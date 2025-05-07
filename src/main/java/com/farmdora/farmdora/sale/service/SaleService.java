@@ -72,7 +72,7 @@ public class SaleService {
         return saleImages.stream()
                 .map(file -> SaleFile.builder()
                         .id(file.getId())
-                        .saveFile(imageProperties.createImageUrl(file.getSaveFile()))
+                        .saveFile(imageProperties.getProduct().createImageUrl(file.getSaveFile()))
                         .sale(file.getSale())
                         .isMain(file.isMain())
                         .originFile(file.getOriginFile())
@@ -106,7 +106,7 @@ public class SaleService {
     private String getMainImage(Optional<SaleFile> saleFile) {
         String mainImage = null;
         if (saleFile.isPresent()) {
-            mainImage = imageProperties.createImageUrl(saleFile.get().getSaveFile());
+            mainImage = imageProperties.getProduct().createImageUrl(saleFile.get().getSaveFile());
         }
         return mainImage;
     }
@@ -136,7 +136,7 @@ public class SaleService {
                                 .stream()
                                 .map(f -> ReviewFile.builder()
                                         .id(f.getId())
-                                        .saveFile(imageProperties.createImageUrl(f.getSaveFile()))
+                                        .saveFile(imageProperties.getReview().createImageUrl(f.getSaveFile()))
                                         .review(f.getReview())
                                         .build()
                                 ).collect(Collectors.toList())
@@ -190,7 +190,7 @@ public class SaleService {
 
         for (SaleRankingDto sale : dtos) {
             sale.setLiked(userId != null && likedSaleIds.contains(sale.getSaleId()));
-            sale.setImageUrl(imageProperties.createImageUrl(sale.getImageUrl()));
+            sale.setImageUrl(imageProperties.getProduct().createImageUrl(sale.getImageUrl()));
         }
 
         Page<SaleRankingDto> page = new PageImpl<>(dtos, pageable, totalElements);
@@ -205,7 +205,7 @@ public class SaleService {
 
         sales.getContent().forEach(s -> {
             if (s.getMainImage() != null) {
-                s.setMainImage(imageProperties.createImageUrl(s.getMainImage()));
+                s.setMainImage(imageProperties.getProduct().createImageUrl(s.getMainImage()));
             }
         });
 

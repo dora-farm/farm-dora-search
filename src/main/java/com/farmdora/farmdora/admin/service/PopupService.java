@@ -28,9 +28,13 @@ public class PopupService {
     public PageResponseDto<PopupSearchResponseDto> searchPopups(PopupSearchRequestDto searchCondition, Pageable pageable) {
         Page<Popup> popups = popupRepository.searchPopups(searchCondition, pageable);
         List<PopupSearchResponseDto> popupSearchResponses = popups.getContent().stream()
-                .map(p -> PopupSearchResponseDto.fromEntity(p,
-                        ncpImageProperties.getPath(),
-                        ncpImageProperties.getType()))
+                .map(p -> {
+                    String imageUrl = null;
+                    if (p.getSaveFile() != null) {
+                        imageUrl = ncpImageProperties.getBanner().createImageUrl(p.getSaveFile());
+                    }
+                    return PopupSearchResponseDto.fromEntity(p, imageUrl);
+                })
                 .toList();
         return new PageResponseDto<>(popupSearchResponses, popups);
     }
