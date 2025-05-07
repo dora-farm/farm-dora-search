@@ -19,8 +19,8 @@ jasypt:
 
 ncp:
   image:
-    path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/product/
-    type: ?type=h&h=192&ttype=png
+    path: ENC(cgpGXPOEF5OQWiOedlvtQxqqK2l52gSzAnT+hUuBvPL/2K/aqb2L/Dbq9hksIXDmsfCZl5CH4oRpiCrV9mS3APRc4D2SzZzC)
+    type: ENC(fJ6Y6vm81GNHx7aPUO6NbOwQARlq01DMfmPejXHv/4k=)
 
 management:
   endpoints:
