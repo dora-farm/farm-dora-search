@@ -47,8 +47,8 @@ public class SecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((auth)->
                         auth
-                                .requestMatchers("/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/my/seller/**").hasRole("SELLER")
+                                .requestMatchers("/api/search/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/api/search/my/seller/**").hasRole("SELLER")
                                 .anyRequest().permitAll())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, redisTemplate), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement((session)-> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
