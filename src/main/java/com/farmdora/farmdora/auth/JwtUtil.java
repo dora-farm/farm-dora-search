@@ -54,7 +54,7 @@ public class JwtUtil {
                     .parseSignedClaims(token).getPayload();
             return !claims.getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
-            log.error("Jwt 요효성 검사 실패: {}" , e.getMessage());
+            log.error("Jwt 요효성 검사 실패");
             return false;
         }
     }
