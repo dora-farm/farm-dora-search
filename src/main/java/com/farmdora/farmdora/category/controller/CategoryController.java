@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/search")
+@RequestMapping("${api.prefix}")
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;

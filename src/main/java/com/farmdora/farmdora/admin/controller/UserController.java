@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/admin/user")
+@RequestMapping("${api.prefix}/admin/user")
 @RequiredArgsConstructor
 public class UserController {
 

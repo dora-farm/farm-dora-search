@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/my/seller/order")
+@RequestMapping("${api.prefix}/my/seller/order")
 @RequiredArgsConstructor
 public class OpinionController {
     private final OpinionService opinionService;

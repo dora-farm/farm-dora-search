@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/my/seller/sale")
+@RequestMapping("${api.prefix}/my/seller/sale")
 @RequiredArgsConstructor
 public class SellerSaleController {
     private final SellerSaleService saleService;
