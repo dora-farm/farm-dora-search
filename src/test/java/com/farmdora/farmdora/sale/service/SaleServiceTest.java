@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyShort;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -47,6 +47,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -132,6 +133,10 @@ class SaleServiceTest {
 
             when(likeRepository.existsByUserUserIdAndSaleId(anyInt(), anyInt())).thenReturn(true);
 
+            NcpImageProperties.ImageInfo bannerMock = Mockito.mock(NcpImageProperties.ImageInfo.class);
+            when(imageProperties.getProduct()).thenReturn(bannerMock);
+            when(bannerMock.createImageUrl(anyString())).thenReturn("https://mocked-url/image.jpg");
+
             // when
             SaleDetailDto saleDetail = saleService.getSaleDetail(1, 1);
 
@@ -195,6 +200,10 @@ class SaleServiceTest {
                     .saveFile("save_file")
                     .build();
             when(saleFileRepository.findBySaleIdAndIsMainIsTrue(anyInt())).thenReturn(Optional.of(mockSaleFile));
+
+            NcpImageProperties.ImageInfo bannerMock = Mockito.mock(NcpImageProperties.ImageInfo.class);
+            when(imageProperties.getProduct()).thenReturn(bannerMock);
+            when(bannerMock.createImageUrl(anyString())).thenReturn("https://mocked-url/image.jpg");
 
             // when
             Pageable pageable = PageRequest.of(0, 10);
@@ -326,18 +335,24 @@ class SaleServiceTest {
                         .title("sale1")
                         .minPrice(10000)
                         .orderCount(10L)
+                        .imageUrl("mocked-url")
                         .build(),
                 SaleRankingDto.builder()
                         .saleId(2)
                         .title("sale2")
                         .minPrice(20000)
                         .orderCount(20L)
+                        .imageUrl("mocked-url")
                         .build()
         );
         Page<SaleRankingDto> saleRanks = new PageImpl<>(sales, pageable, 2);
         when(saleRepository.findTop50ByOrderCount(pageable)).thenReturn(saleRanks);
 
         when(likeRepository.findSaleIdsByUserId(anyInt())).thenReturn(Set.of(1, 2, 3, 4));
+
+        NcpImageProperties.ImageInfo bannerMock = Mockito.mock(NcpImageProperties.ImageInfo.class);
+        when(imageProperties.getProduct()).thenReturn(bannerMock);
+        when(bannerMock.createImageUrl(anyString())).thenReturn("https://mocked-url/image.jpg");
 
         // when
         PageResponseDto<SaleRankingDto> result = saleService.getTop50Sales(1, pageable);
@@ -354,10 +369,20 @@ class SaleServiceTest {
     @DisplayName("상품의 랭킹 정보 캐시 조회 서비스 레이어 테스트")
     void testGetSaleRankByCache() {
         // given
-        List<SaleRankingDto> saleRanks = new ArrayList<>();
-        saleRanks.add(new SaleRankingDto());
+        List<SaleRankingDto> saleRanks = List.of(
+                SaleRankingDto.builder()
+                        .imageUrl("mocked-url")
+                        .build(),
+                SaleRankingDto.builder()
+                        .imageUrl("mocked-url")
+                        .build()
+        );
         when(saleRedisService.findSaleRanks(anyInt())).thenReturn(saleRanks);
-        when(saleRedisService.findSaleRankCount()).thenReturn(1);
+        when(saleRedisService.findSaleRankCount()).thenReturn(2);
+
+        NcpImageProperties.ImageInfo bannerMock = Mockito.mock(NcpImageProperties.ImageInfo.class);
+        when(imageProperties.getProduct()).thenReturn(bannerMock);
+        when(bannerMock.createImageUrl(anyString())).thenReturn("https://mocked-url/image.jpg");
 
         // when
         Pageable pageable = PageRequest.of(0, 10);
@@ -365,7 +390,7 @@ class SaleServiceTest {
 
         // then
         verify(saleRepository, times(0)).findTop50ByOrderCount(pageable);
-        assertThat(result.getContents().size()).isEqualTo(1);
+        assertThat(result.getContents().size()).isEqualTo(2);
     }
 
     @Test

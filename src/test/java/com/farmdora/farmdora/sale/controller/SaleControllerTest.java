@@ -54,7 +54,7 @@ public class SaleControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(get("/sale/{saleId}", 1)
+            mvc.perform(get("/api/search/sale/{saleId}", 1)
                             .param("userId", "1"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status", equalTo(200)))
@@ -71,7 +71,7 @@ public class SaleControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(get("/sale/{saleId}", 1)
+            mvc.perform(get("/api/search/sale/{saleId}", 1)
                             .param("userId", "1"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status", equalTo(400)))
@@ -102,7 +102,7 @@ public class SaleControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(get("/sale/related/{saleId}", 1)
+            mvc.perform(get("/api/search/sale/related/{saleId}", 1)
                             .param("userId", "1"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status", equalTo(200)))
@@ -118,7 +118,7 @@ public class SaleControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(get("/sale/related/{saleId}", 1)
+            mvc.perform(get("/api/search/sale/related/{saleId}", 1)
                             .param("userId", "1"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status", equalTo(400)))
@@ -145,7 +145,7 @@ public class SaleControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(get("/sale/review/{saleId}", 1))
+            mvc.perform(get("/api/search/sale/review/{saleId}", 1))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status", equalTo(200)))
                     .andExpect(jsonPath("$.message", equalTo(SEARCH_REVIEWS_SUCCESS.getMessage())))
@@ -160,7 +160,7 @@ public class SaleControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(get("/sale/review/{saleId}", 1))
+            mvc.perform(get("/api/search/sale/review/{saleId}", 1))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status", equalTo(400)))
                     .andExpect(jsonPath("$.message", equalTo("Sale 데이터가 존재하지 않습니다 : '1'")));
@@ -191,7 +191,7 @@ public class SaleControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(get("/sale/question/{saleId}", 1))
+            mvc.perform(get("/api/search/sale/question/{saleId}", 1))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.status", equalTo(200)))
                     .andExpect(jsonPath("$.message", equalTo(SEARCH_QUESTION_SUCCESS.getMessage())));
@@ -206,7 +206,7 @@ public class SaleControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(get("/sale/question/{saleId}", 1))
+            mvc.perform(get("/api/search/sale/question/{saleId}", 1))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.status", equalTo(400)))
                     .andExpect(jsonPath("$.message", equalTo("Sale 데이터가 존재하지 않습니다 : '1'")));
@@ -228,7 +228,7 @@ public class SaleControllerTest extends ControllerTest {
 
         // when
         // then
-        mvc.perform(get("/sale/rank"))
+        mvc.perform(get("/api/search/sale/rank"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", equalTo(200)))
                 .andExpect(jsonPath("$.message", equalTo(GET_SALES_RANK.getMessage())))
@@ -254,7 +254,7 @@ public class SaleControllerTest extends ControllerTest {
 
         // when
         // then
-        mvc.perform(get("/sale/type")
+        mvc.perform(get("/api/search/sale/type")
                         .param("bigTypeId", "2")
                         .param("typeId", "6")
                         .param("sort", "RECOMMEND"))

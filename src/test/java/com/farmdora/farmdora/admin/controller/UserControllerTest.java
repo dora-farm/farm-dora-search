@@ -44,7 +44,7 @@ class UserControllerTest extends ControllerTest {
 
         // when
         // then
-        mvc.perform(get("/admin/user")
+        mvc.perform(get("/api/search/admin/user")
                 .param("keyword", "user")
                 .param("types", "USER"))
                 .andExpect(status().isOk())

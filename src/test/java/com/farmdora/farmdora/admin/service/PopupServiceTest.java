@@ -2,6 +2,7 @@ package com.farmdora.farmdora.admin.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.farmdora.farmdora.admin.dto.PopupSearchRequestDto;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -64,6 +66,10 @@ class PopupServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Popup> popupPages = new PageImpl<>(popups, pageable, 2);
         when(popupRepository.searchPopups(any(PopupSearchRequestDto.class), any(Pageable.class))).thenReturn(popupPages);
+
+        NcpImageProperties.ImageInfo bannerMock = Mockito.mock(NcpImageProperties.ImageInfo.class);
+        when(ncpImageProperties.getBanner()).thenReturn(bannerMock);
+        when(bannerMock.createImageUrl(anyString())).thenReturn("https://mocked-url/image.jpg");
 
         // when
         PopupSearchRequestDto searchCondition = PopupSearchRequestDto.builder()

@@ -51,7 +51,7 @@ class OrderControllerTest extends ControllerTest {
 
         // when
         // then
-        mvc.perform(get("/my/seller/order/search")
+        mvc.perform(get("/api/search/my/seller/order")
                         .param("userId", "1")
                         .param("searchType", "PRODUCT")
                         .param("keyword", "상품")

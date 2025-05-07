@@ -77,7 +77,7 @@ class SellerSaleControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(post("/my/seller/sale/search")
+            mvc.perform(post("/api/search/my/seller/sale")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(searchCondition)))
                     .andExpect(status().isOk())
@@ -93,7 +93,7 @@ class SellerSaleControllerTest extends ControllerTest {
 
             // when
             // then
-            mvc.perform(get("/my/seller/sale/search")
+            mvc.perform(get("/api/search/my/seller/sale")
                             .param("keyword", "상추")
                             .param("sort", "LATEST")
                             .param("typeBigId", "1")

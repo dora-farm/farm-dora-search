@@ -55,7 +55,7 @@ class OpinionControllerTest extends ControllerTest {
 
         // when
         // then
-        mvc.perform(get("/my/seller/order/inquiry")
+        mvc.perform(get("/api/search/my/seller/order/inquiry")
                         .param("sellerId", "1")
                         .param("searchType", "PRODUCT")
                         .param("keyword", "상추")
@@ -96,7 +96,7 @@ class OpinionControllerTest extends ControllerTest {
 
         // when
         // then
-        mvc.perform(get("/my/seller/order/review")
+        mvc.perform(get("/api/search/my/seller/order/review")
                         .param("sellerId", "1")
                         .param("searchType", "PRODUCT")
                         .param("keyword", "상추")

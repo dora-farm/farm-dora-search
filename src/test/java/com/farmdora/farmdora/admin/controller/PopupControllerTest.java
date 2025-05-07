@@ -43,7 +43,7 @@ class PopupControllerTest extends ControllerTest {
 
         // when
         // then
-        mvc.perform(get("/admin/popup"))
+        mvc.perform(get("/api/search/admin/popup"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", equalTo(200)))
                 .andExpect(jsonPath("$.message", equalTo(GET_POPUPS_SUCCESS.getMessage())));
@@ -67,7 +67,7 @@ class PopupControllerTest extends ControllerTest {
 
         // when
         // then
-        mvc.perform(get("/admin/popup/type"))
+        mvc.perform(get("/api/search/admin/popup/type"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message", equalTo(GET_POPUP_TYPES_SUCCESS.getMessage())))
                 .andExpect(jsonPath("$.data.size()", equalTo(2)));
