@@ -1,3 +1,6 @@
+api:
+  prefix: /api/search
+
 spring:
   datasource:
     url: jdbc:h2:mem:testdb;MODE=MYSQL
@@ -28,5 +31,15 @@ jasypt:
 
 ncp:
   image:
-    path: https://zcbg41sa9729.edge.naverncp.com/O8XfcLSSm6/product/
-    type: ?type=h&h=192&ttype=png
+    product:
+      path: ENC(cgpGXPOEF5OQWiOedlvtQxqqK2l52gSzAnT+hUuBvPL/2K/aqb2L/Dbq9hksIXDmsfCZl5CH4oRpiCrV9mS3APRc4D2SzZzC)
+      type: ENC(fJ6Y6vm81GNHx7aPUO6NbOwQARlq01DMfmPejXHv/4k=)
+    banner:
+      path: ENC(DkxaYoRHoFBgGvW/2aJuvtFgf1OBr8fFpMkRvLlcQtdPuBzbCstm8az7n/v19w28D9jZhCrrM7Va86helvlv7QTctgnwnMN3)
+      type: ENC(uuGcTGNuU9psVFg6/E4Ix16itgz93bjOMOJONAbGiDgcx61qU46oZFRWphctLIN4Lf0uwnyrf/OD6BANa6LNH2y1wZINb9MwmJ691GFzHIY=)
+    event:
+      path: ENC(15nNACgEa2ZAnpwnW9NyR2CDOl+TQ8Nz9RKuHiijjqcyNtKXrSKUcoEzfthPomLovMOoAG99hfaVbD+2pTJJNW6GNuL5drgj)
+      type: ENC(X6mJwi2fjFRtK3YV6mtJzhKJUXPGl7pqf7DGQO7ommrcQ6FxODuDl3OfNQLO4s9HUuGQp3xh9oqSBdD1MZ1pZUTTN4Z4xWAC)
+    review:
+      path: ENC(gPkdfRtPPpaeai7vOo+WrDVCXawRlcZFT4n3eTthJR/+ZooPhCOKQtAK48i9AOxLN8yOpTIGUydF12/Z/8CdnQ8JilxQiaXK)
+      type: ENC(alzL6HsotGrLyKnB9lckv9IqIIAxF5TEja2+KzRNDNp1Vua4fGenWaDjzZK8yzML)
