@@ -25,7 +25,7 @@ public class OrderController {
     private final OrderService orderService;
     private final PrincipalUtil principalUtil;
 
-    @GetMapping("/search")
+    @GetMapping
     public ResponseEntity<?> searchOrders(Principal principal,
                                           OrderSearchRequestDto searchCondition,
                                           @PageableDefault Pageable pageable) {

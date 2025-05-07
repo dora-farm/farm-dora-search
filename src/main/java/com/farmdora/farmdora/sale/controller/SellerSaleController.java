@@ -26,7 +26,7 @@ public class SellerSaleController {
     private final SellerSaleService saleService;
     private final PrincipalUtil principalUtil;
 
-    @PostMapping("/search")
+    @PostMapping
     public ResponseEntity<?> searchWithJson(Principal principal, @RequestBody SaleSearchRequestDto searchCondition) {
         Integer userId = principalUtil.extractUserIdRequired(principal);
         Pageable pageable = searchCondition.toPageable();
@@ -35,7 +35,7 @@ public class SellerSaleController {
                 .body(new HttpResponse(HttpStatus.OK, SEARCH_SALES_SUCCESS.getMessage(), result));
     }
 
-    @GetMapping("/search")
+    @GetMapping
     public ResponseEntity<?> searchWithParams(Principal principal) {
         Integer userId = principalUtil.extractUserIdRequired(principal);
         SaleSearchRequestDto searchCondition = SaleSearchRequestDto.builder().build();
