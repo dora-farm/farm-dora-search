@@ -10,10 +10,19 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "ncp.image")
 public class NcpImageProperties {
-    private String path;
-    private String type;
+    private ImageInfo product;
+    private ImageInfo banner;
+    private ImageInfo event;
+    private ImageInfo review;
 
-    public String createImageUrl(String imageUrl) {
-        return String.format("%s%s%s", path, imageUrl, type);
+    @Getter
+    @Setter
+    public static class ImageInfo {
+        private String path;
+        private String type;
+
+        public String createImageUrl(String imageName) {
+            return String.format("%s%s%s", path, imageName, type);
+        }
     }
 }
