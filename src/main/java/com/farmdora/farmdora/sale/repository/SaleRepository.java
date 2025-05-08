@@ -36,7 +36,7 @@ public interface SaleRepository extends JpaRepository<Sale, Integer>, CustomSell
             "FROM Sale s " +
             "JOIN Option o ON o.sale = s " +
             "JOIN OrderOption oo ON oo.option = o " +
-            "LEFT JOIN SaleFile sf ON sf.sale = s AND sf.isMain = true " +
+            "LEFT JOIN SaleFile sf ON sf.sale = s AND sf.isMain = false " +
             "GROUP BY s.id, s.title, sf.saveFile " +
             "ORDER BY COUNT(oo.id) DESC, s.id DESC")
     Page<SaleRankingDto> findTop50ByOrderCount(Pageable pageable);

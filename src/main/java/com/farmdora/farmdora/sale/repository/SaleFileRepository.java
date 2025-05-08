@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SaleFileRepository extends JpaRepository<SaleFile, Integer> {
     List<SaleFile> findAllBySale(Sale sale);
-    Optional<SaleFile> findBySaleIdAndIsMainIsTrue(Integer saleId);
+    Optional<SaleFile> findBySaleIdAndIsMainIsFalse(Integer saleId);
 }
