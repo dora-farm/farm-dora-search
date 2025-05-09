@@ -97,7 +97,7 @@ public class SaleService {
         List<SaleRelatedDto> relatedSales = new ArrayList<>();
         for (SaleRelatedInfoDto relatedSale : relatedSaleDetails) {
             boolean isLike = likeRepository.existsByUserUserIdAndSaleId(userId, relatedSale.getSaleId());
-            Optional<SaleFile> saleFile = saleFileRepository.findBySaleIdAndIsMainIsTrue(relatedSale.getSaleId());
+            Optional<SaleFile> saleFile = saleFileRepository.findBySaleIdAndIsMainIsFalse(relatedSale.getSaleId());
             relatedSales.add(SaleRelatedDto.createSaleRelatedDto(relatedSale, getMainImage(saleFile), isLike));
         }
         return relatedSales;

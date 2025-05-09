@@ -22,6 +22,9 @@ public class NcpImageProperties {
         private String type;
 
         public String createImageUrl(String imageName) {
+            if (imageName == null || imageName.equals("")) {
+                return null;
+            }
             return String.format("%s%s%s", path, imageName, type);
         }
     }

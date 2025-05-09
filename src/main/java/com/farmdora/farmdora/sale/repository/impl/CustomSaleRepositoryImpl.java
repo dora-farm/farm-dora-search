@@ -54,7 +54,7 @@ public class CustomSaleRepositoryImpl implements CustomSaleRepository {
                 .leftJoin(option).on(option.sale.eq(sale))
                 .leftJoin(orderOption).on(orderOption.option.eq(option))
                 .leftJoin(review).on(review.sale.eq(sale))
-                .leftJoin(saleFile).on(saleFile.sale.eq(sale).and(saleFile.isMain.isTrue()))
+                .leftJoin(saleFile).on(saleFile.sale.eq(sale).and(saleFile.isMain.isFalse()))
                 .leftJoin(like).on(like.sale.eq(sale))
                 .where(
                         keywordContains(searchCondition.getKeyword()),
