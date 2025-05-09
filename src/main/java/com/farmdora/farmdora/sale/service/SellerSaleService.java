@@ -33,6 +33,17 @@ public class SellerSaleService {
         return new PageResponseDto<>(saleSearchResponseDtos, salePage);
     }
 
+    @Transactional(readOnly = true)
+    public PageResponseDto<SaleSearchResponseDto> searchSalesAdmin(SaleSearchRequestDto searchCondition, Pageable pageable) {
+        Page<SaleDto> salePage = saleRepository.searchSalesAdmin(searchCondition, pageable);
+        List<SaleDto> sales = salePage.getContent();
+        List<Integer> saleIds = getSaleIds(sales);
+        List<SaleOrderCountDto> orderCounts = getOrderCounts(saleIds);
+        List<SaleSearchResponseDto> saleSearchResponseDtos = saleMapper.mapToSaleSearchResponseDto(saleIds, sales, orderCounts);
+
+        return new PageResponseDto<>(saleSearchResponseDtos, salePage);
+    }
+
     private List<SaleOrderCountDto> getOrderCounts(List<Integer> saleIds) {
         List<SaleOrderCountDto> orderCounts = new ArrayList<>();
         if (!saleIds.isEmpty()) {

@@ -68,6 +68,37 @@ public class CustomSellerSaleRepositoryImpl implements CustomSellerSaleRepositor
     }
 
     @Override
+    public Page<SaleDto> searchSalesAdmin(SaleSearchRequestDto searchCondition, Pageable pageable) {
+        List<SaleDto> sales = queryFactory
+                .select(
+                        new QSaleDto(sale.id, sale.title, sale.isBlind, option.price.min(), option.quantity.sum())
+                )
+                .from(sale)
+                .join(option).on(option.sale.eq(sale))
+                .join(saleType).on(sale.type.eq(saleType))
+                .join(saleTypeBig).on(saleType.saleTypeBig.eq(saleTypeBig))
+                .where(
+                        // userId 조건 제거 (관리자는 모든 판매 데이터 조회)
+                        titleContains(searchCondition.getKeyword()),
+                        isBlindEq(searchCondition.getFilters()),
+                        isSmallTypeEq(searchCondition.getTypeId()),
+                        isBigTypeEq(searchCondition.getTypeBigId())
+                )
+                .groupBy(sale.id, sale.title, sale.isBlind, sale.createdDate)
+                .orderBy(
+                        salesCreatedDateOrderBy(searchCondition.getSort()),
+                        salesIdOrderBy(searchCondition.getSort())
+                )
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
+                .fetch();
+
+        JPAQuery<Long> countQuery = createCountQueryAdmin(searchCondition);
+
+        return PageableExecutionUtils.getPage(sales, pageable, countQuery::fetchOne);
+    }
+
+    @Override
     public List<SaleOrderCountDto> searchSaleOrderCount(List<Integer> saleIds) {
         return queryFactory
                 .select(new QSaleOrderCountDto(sale.id, orderOption.id.count()))
@@ -87,6 +118,23 @@ public class CustomSellerSaleRepositoryImpl implements CustomSellerSaleRepositor
                 .join(saleTypeBig).on(saleType.saleTypeBig.eq(saleTypeBig))
                 .where(
                         sale.seller.user.userId.eq(userId),
+                        titleContains(searchCondition.getKeyword()),
+                        isBlindEq(searchCondition.getFilters()),
+                        isSmallTypeEq(searchCondition.getTypeId()),
+                        isBigTypeEq(searchCondition.getTypeBigId())
+                );
+    }
+
+    // Admin용 카운트 쿼리 (userId 조건 제거)
+    private JPAQuery<Long> createCountQueryAdmin(SaleSearchRequestDto searchCondition) {
+        return queryFactory
+                .select(sale.countDistinct())
+                .from(sale)
+                .join(option).on(option.sale.eq(sale))
+                .join(saleType).on(sale.type.eq(saleType))
+                .join(saleTypeBig).on(saleType.saleTypeBig.eq(saleTypeBig))
+                .where(
+                        // userId 필터링 제거
                         titleContains(searchCondition.getKeyword()),
                         isBlindEq(searchCondition.getFilters()),
                         isSmallTypeEq(searchCondition.getTypeId()),

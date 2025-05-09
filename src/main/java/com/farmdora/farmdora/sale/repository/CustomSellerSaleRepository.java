@@ -9,5 +9,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface CustomSellerSaleRepository {
     Page<SaleDto> searchSales(Integer sellerId, SaleSearchRequestDto searchCondition, Pageable pageable);
+    Page<SaleDto> searchSalesAdmin(SaleSearchRequestDto searchCondition, Pageable pageable);
     List<SaleOrderCountDto> searchSaleOrderCount(List<Integer> saleIds);
 }
