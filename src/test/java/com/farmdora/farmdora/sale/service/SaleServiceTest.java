@@ -199,7 +199,7 @@ class SaleServiceTest {
                     .originFile("origin_file")
                     .saveFile("save_file")
                     .build();
-            when(saleFileRepository.findBySaleIdAndIsMainIsTrue(anyInt())).thenReturn(Optional.of(mockSaleFile));
+            when(saleFileRepository.findBySaleIdAndIsMainIsFalse(anyInt())).thenReturn(Optional.of(mockSaleFile));
 
             NcpImageProperties.ImageInfo bannerMock = Mockito.mock(NcpImageProperties.ImageInfo.class);
             when(imageProperties.getProduct()).thenReturn(bannerMock);

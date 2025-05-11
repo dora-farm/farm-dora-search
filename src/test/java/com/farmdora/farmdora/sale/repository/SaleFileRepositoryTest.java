@@ -58,12 +58,12 @@ class SaleFileRepositoryTest {
 
         SaleFile saleFile1 = SaleFile.builder()
                 .sale(sale)
-                .isMain(false)
+                .isMain(true)
                 .build();
         SaleFile saleFile2 = SaleFile.builder()
                 .sale(sale)
                 .saveFile("saveFile")
-                .isMain(true)
+                .isMain(false)
                 .build();
         em.persist(saleFile1);
         em.persist(saleFile2);
@@ -72,7 +72,7 @@ class SaleFileRepositoryTest {
         em.clear();
 
         // when
-        Optional<SaleFile> saleFile = saleFileRepository.findBySaleIdAndIsMainIsTrue(sale.getId());
+        Optional<SaleFile> saleFile = saleFileRepository.findBySaleIdAndIsMainIsFalse(sale.getId());
 
         // then
         assertThat(saleFile.isPresent()).isEqualTo(true);
